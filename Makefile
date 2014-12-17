@@ -1,4 +1,4 @@
-LIBS   = -ldl -ltoxcore
+LIBS   = -ljansson -ltoxcore
 SRC=$(wildcard *.c)
 
 all: toxdump

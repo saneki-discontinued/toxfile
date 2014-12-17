@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <tox/tox.h>
+#include "helper.h"
 #include "toxdump.h"
 #include "toxdump_json.h"
 
@@ -22,22 +23,35 @@ int main(int argc, char *argv[])
 
 void parse_args(int argc, char *argv[], toxdump_args *args)
 {
-	int c, longopt_index = 0;
+	int c, index, longopt_index = 0;
 	struct option longopts[] =
 	{
 		{ "help", no_argument, 0, 'h' },
+		{ "json", no_argument, 0, 'j' },
 		{ 0, 0, 0, 0 }
 	};
 
-	while((c = getopt_long(argc, argv, "h?", longopts, &longopt_index)) != -1)
+	while((c = getopt_long(argc, argv, "hj?", longopts, &longopt_index)) != -1)
 	{
 		switch(c)
 		{
+			case 'j':
+				args->format = TOXDUMP_FORMAT_JSON;
+				break;
+
 			case 'h':
 			case '?':
 				args->print_help = true;
 				break;
 		}
+	}
+
+	for(index = optind; index < argc; index++)
+	{
+		// Only care about first, which would be the toxfile
+		args->toxfile_path = argv[index];
+		printf("TOXFILE_PATH = %s\n", args->toxfile_path);
+		break;
 	}
 }
 
@@ -47,6 +61,30 @@ int perform(toxdump_args *args)
 	{
 		print_help();
 		return 0;
+	}
+
+	if(args->toxfile_path != NULL)
+	{
+		// Make this better
+		Tox *tox = tox_new(NULL);
+		if(tox == NULL) return -1;
+		FILE *infile = fopen(args->toxfile_path, "rb");
+		if(infile == NULL) return -1;
+
+		int64_t savesize = fsize(infile);
+		uint8_t savedata[savesize];
+		fread(savedata, savesize, 1, infile);
+		fclose(infile);
+
+		int loadret = tox_load(tox, savedata, savesize);
+		if(loadret != 0) return;
+
+		FILE *outfile = stdout;
+
+		if(args->format == TOXDUMP_FORMAT_JSON)
+		{
+			toxdump_perform_json(tox, outfile);
+		}
 	}
 
 	return 0;
@@ -66,7 +104,8 @@ void print_help()
 {
 	printf("toxdump - dump tox file to some format\n");
 	print_help_modules();
-	printf("usage:\n");
+	printf("usage: toxdump [-hj?] [toxfile]\n");
+	printf("  -j, --json        dump to JSON\n");
 	printf("  -h, -?, --help    display this usage message\n");
 }
 
