@@ -3,8 +3,8 @@
 #include <tox/tox.h>
 #include "toxdump.h"
 #include "toxdump_json.h"
-#include "toxfile_state.h"
-#include "hex.h"
+#include "../toxfile_state.h"
+#include "../hex.h"
 
 void *jansson_handle = NULL;
 

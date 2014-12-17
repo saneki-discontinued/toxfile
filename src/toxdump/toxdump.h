@@ -2,7 +2,7 @@
 #define TOXDUMP_H
 
 #include <stdbool.h>
-#include "toxfile_state.h"
+#include "../toxfile_state.h"
 
 #define TOXDUMP_FORMAT_NONE 0
 #define TOXDUMP_FORMAT_JSON 1

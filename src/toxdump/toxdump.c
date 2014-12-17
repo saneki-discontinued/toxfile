@@ -5,8 +5,8 @@
 #include <tox/tox.h>
 #include "toxdump.h"
 #include "toxdump_json.h"
-#include "toxfile_state.h"
-#include "file.h"
+#include "../toxfile_state.h"
+#include "../file.h"
 
 toxdump_module g_json_module = TOXDUMP_INIT_MODULE;
 
