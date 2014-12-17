@@ -134,8 +134,8 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 
 void print_help()
 {
-	printf("toxsave - utility for tox data files\n");
-	printf("usage: toxsave [OPTIONS]\n");
+	printf("toxfile - utility for tox data files\n");
+	printf("usage: toxfile [OPTIONS]\n");
 	printf(" -t, --toxfile=PATH      path to tox save file\n");
 	printf(" -a, --print-address     print tox address\n");
 	printf(" -B, --hash-write-bin    write hash to stdout as binary\n");

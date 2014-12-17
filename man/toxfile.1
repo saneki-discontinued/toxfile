@@ -1,0 +1,36 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "TOXFILE" "1" "December 2014" "" ""
+.
+.SH "NAME"
+\fBtoxfile\fR \- tox save file utility
+.
+.SH "SYNOPSIS"
+\fBtoxfile\fR [\fIoptions\fR\.\.\.]
+.
+.br
+\fBtoxfile\fR \fB\-t\fR \fIPATH\fR [\fIoptions\fR\.\.\.]
+.
+.SH "DESCRIPTION"
+\fBtoxfile\fR is a utility for tox save files\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fB\-t\fR, \fB\-\-toxfile\fR[=\fIPATH\fR]
+Path of tox save file to use\. If this is not specified, \fBtoxfile\fR will try to guess the save file location using common paths\.
+.
+.TP
+\fB\-d\fR, \fB\-\-decrypt\fR
+Decrypt the specified tox save file\. Requires TOXSAVE_USE_ENC\.
+.
+.TP
+\fB\-e\fR, \fB\-\-encrypt\fR
+Encrypt the specified tox save file with a password\. Requires TOXSAVE_USE_ENC\.
+.
+.SH "BUILD FLAGS"
+TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox save files\. Requires libtoxencryptsave to be installed\.
+.
+.SH "GITHUB"
+https://github\.com/saneki/toxfile

@@ -1,0 +1,19 @@
+toxdump(1) -- dump tox files to other formats
+=============================================
+
+## SYNOPSIS
+
+`toxdump` [<options>...] <file>
+
+## DESCRIPTION
+
+**toxdump** is a utility for dumping tox files to other formats.
+
+## OPTIONS
+
+  * `-j`, `--json`:
+    Use JSON as the format to dump to.
+
+## GITHUB
+
+https://github.com/saneki/toxfile

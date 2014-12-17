@@ -1,0 +1,32 @@
+toxfile(1) -- tox save file utility
+===================================
+
+## SYNOPSIS
+
+`toxfile` [<options>...]<br>
+`toxfile` `-t` <PATH> [<options>...]
+
+## DESCRIPTION
+
+**toxfile** is a utility for tox save files.
+
+## OPTIONS
+
+  * `-t`, `--toxfile`[=<PATH>]:
+    Path of tox save file to use. If this is not specified, **toxfile** will try to
+    guess the save file location using common paths.
+
+  * `-d`, `--decrypt`:
+    Decrypt the specified tox save file. Requires TOXSAVE_USE_ENC.
+
+  * `-e`, `--encrypt`:
+    Encrypt the specified tox save file with a password. Requires TOXSAVE_USE_ENC.
+
+## BUILD FLAGS
+
+  TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox save files. Requires
+    libtoxencryptsave to be installed.
+
+## GITHUB
+
+https://github.com/saneki/toxfile
