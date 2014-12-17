@@ -8,17 +8,11 @@
 #include "../toxfile_state.h"
 #include "../file.h"
 
-toxdump_module g_json_module = TOXDUMP_INIT_MODULE;
-
 int main(int argc, char *argv[])
 {
 	toxdump_args args = TOXDUMP_INIT_ARGS;
 	parse_args(argc, argv, &args);
-
-	init_modules();
 	int ret = perform(&args);
-	teardown_modules();
-
 	return ret;
 }
 
@@ -94,40 +88,10 @@ int perform(toxdump_args *args)
 	return 0;
 }
 
-void teardown_modules()
-{
-	toxdump_teardown_json_module();
-}
-
-void init_modules()
-{
-	toxdump_create_json_module(&g_json_module);
-}
-
 void print_help()
 {
 	printf("toxdump - dump tox file to some format\n");
-	print_help_modules();
 	printf("usage: toxdump [-hj?] [toxfile]\n");
 	printf("  -j, --json        dump to JSON\n");
 	printf("  -h, -?, --help    display this usage message\n");
-}
-
-void print_help_modules()
-{
-	printf("modules:");
-	if(is_module_loaded(&g_json_module))
-	{
-		printf(" json (libjansson)");
-	}
-	printf("\n");
-}
-
-bool is_module_loaded(toxdump_module *module)
-{
-	if(module != NULL && module->func != NULL)
-	{
-		return true;
-	}
-	return false;
 }

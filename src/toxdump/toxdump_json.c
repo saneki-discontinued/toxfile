@@ -6,21 +6,6 @@
 #include "../toxfile_state.h"
 #include "../hex.h"
 
-void *jansson_handle = NULL;
-
-void toxdump_create_json_module(toxdump_module *module)
-{
-	//jansson_handle = dlopen("libjansson.so", RTLD_LAZY);
-	//if(!jansson_handle)
-	//{
-	//	return;
-	//}
-
-	// Todo: Set global variable function pointers
-
-	module->func = toxdump_perform_json;
-}
-
 int toxdump_perform_json(toxfile_state_t *state, FILE *file)
 {
 	json_t *j_root = json_object();
@@ -72,12 +57,4 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file)
 	free(j_root);
 
 	return success;
-}
-
-void toxdump_teardown_json_module()
-{
-	//if(jansson_handle)
-	//{
-	//	dlclose(jansson_handle);
-	//}
 }
