@@ -3,9 +3,10 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <tox/tox.h>
-#include "helper.h"
 #include "toxdump.h"
 #include "toxdump_json.h"
+#include "toxfile_state.h"
+#include "file.h"
 
 toxdump_module g_json_module = TOXDUMP_INIT_MODULE;
 
@@ -81,9 +82,12 @@ int perform(toxdump_args *args)
 
 		FILE *outfile = stdout;
 
+		toxfile_state_t state;
+		toxfile_load_state(tox, &state, 0);
+
 		if(args->format == TOXDUMP_FORMAT_JSON)
 		{
-			toxdump_perform_json(tox, outfile);
+			toxdump_perform_json(&state, outfile);
 		}
 	}
 

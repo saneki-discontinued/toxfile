@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
+#include "file.h"
 
 int64_t fsize(FILE *file)
 {

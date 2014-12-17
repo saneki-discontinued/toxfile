@@ -3,6 +3,7 @@
 #include <tox/tox.h>
 #include "toxdump.h"
 #include "toxdump_json.h"
+#include "toxfile_state.h"
 #include "hex.h"
 
 void *jansson_handle = NULL;
@@ -20,43 +21,54 @@ void toxdump_create_json_module(toxdump_module *module)
 	module->func = toxdump_perform_json;
 }
 
-int toxdump_perform_json(Tox *tox, FILE *file)
+int toxdump_perform_json(toxfile_state_t *state, FILE *file)
 {
 	json_t *j_root = json_object();
 
-	// Tox address
-	uint8_t t_address_buffer[TOX_FRIEND_ADDRESS_SIZE];
-	tox_get_address(tox, t_address_buffer);
-	uint8_t t_address[TOX_FRIEND_ADDRESS_SIZE * 2];
-	to_hex(t_address, t_address_buffer, sizeof(t_address_buffer), 0);
-
-	// Tox name
-	int t_name_size = tox_get_self_name_size(tox); // Assume success for now
-	uint8_t t_name[t_name_size];
-	tox_get_self_name(tox, t_name);
-
-	// Tox status message
-	int t_status_msg_size = tox_get_self_status_message_size(tox); // Assume success for now
-	uint8_t t_status_msg[t_status_msg_size];
-	tox_get_self_status_message(tox, t_status_msg, t_status_msg_size);
+	// Binary -> Hex strings
+	uint8_t t_address_hex[sizeof(state->address) * 2];
+	uint8_t t_public_key_hex[sizeof(state->public_key) * 2];
+	to_hex(t_address_hex, (char*)state->address, sizeof(state->address), 0);
+	to_hex(t_public_key_hex, (char*)state->address, sizeof(state->address), 0);
 
 	// Initialize json_t variables
-	json_t *j_str_name = json_stringn((char*)t_name, sizeof(t_name));
-	json_t *j_str_status_msg = json_stringn((char*)t_status_msg, sizeof(t_status_msg));
-	json_t *j_str_address = json_stringn((char*)t_address, sizeof(t_address));
+	json_t *j_str_name = json_stringn((char*)state->name, state->name_len);
+	json_t *j_str_status_msg = json_stringn((char*)state->status_message, state->status_message_len);
+	json_t *j_str_address = json_stringn((char*)t_address_hex, sizeof(t_address_hex));
+	json_t *j_int_status = json_integer(state->status);
+	json_t *j_str_public_key = json_stringn((char*)t_public_key_hex, sizeof(t_public_key_hex));
+	json_t *j_str_private_key = NULL;
 
 	// Set fields to root variable
-	json_object_set(j_root, "name", j_str_name);
-	json_object_set(j_root, "status_message", j_str_status_msg);
 	json_object_set(j_root, "address", j_str_address);
+	json_object_set(j_root, "name", j_str_name);
+	json_object_set(j_root, "public_key", j_str_public_key);
+	json_object_set(j_root, "status", j_int_status);
+	json_object_set(j_root, "status_message", j_str_status_msg);
+
+	if(state->has_private_key == 1)
+	{
+		uint8_t t_private_key_hex[sizeof(state->private_key) * 2];
+		to_hex(t_private_key_hex, state->private_key, sizeof(state->private_key), 0);
+		j_str_private_key = json_stringn((char*)t_private_key_hex, sizeof(t_private_key_hex));
+		json_object_set(j_root, "private_key", j_str_private_key);
+	}
 
 	// Write to file
-	int success = json_dumpf(j_root, file, 0);
+	int success = json_dumpf(j_root, file, JSON_SORT_KEYS);
 
 	// Free json_t variables
 	free(j_str_name);
 	free(j_str_status_msg);
 	free(j_str_address);
+	free(j_int_status);
+	free(j_str_public_key);
+
+	if(j_str_private_key != NULL)
+	{
+		free(j_str_private_key);
+	}
+
 	free(j_root);
 
 	return success;
