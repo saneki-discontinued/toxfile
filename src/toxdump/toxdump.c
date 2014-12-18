@@ -72,7 +72,7 @@ int perform(toxdump_args *args)
 		fclose(infile);
 
 		int loadret = tox_load(tox, savedata, savesize);
-		if(loadret != 0) return;
+		if(loadret != 0) return -1;
 
 		FILE *outfile = stdout;
 

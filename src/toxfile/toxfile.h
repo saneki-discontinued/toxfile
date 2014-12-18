@@ -18,14 +18,6 @@
 #define TOXSAVE_EXPRINT_NAME 4
 #define TOXSAVE_EXPRINT_STATUS 5
 
-// Default paths to save file, relative to home (on *nix systems)
-#define TOXSAVE_NIX_HPATH_VENOM ".config/tox/data"
-#define TOXSAVE_NIX_HPATH_UTOX ".config/tox/tox_save"
-
-#ifndef PASS_MAX
-#define PASS_MAX 4096
-#endif
-
 #define TOXSAVE_HASH_MAX TOX_AVATAR_MAX_DATA_LENGTH
 
 // Error constants
@@ -55,21 +47,15 @@ typedef struct __toxsave_args_t
 
 // Prototypes
 void toxsave_do(Tox *tox, toxsave_args_t *args);
-int toxsave_getpass(const char *text, char *out, size_t outlen);
 int toxsave_hash(toxsave_args_t *args);
 void toxsave_new(toxsave_args_t *args);
 void toxsave_open(toxsave_args_t *args);
 int toxsave_save(Tox *tox, const char *path);
-int toxsave_prompt_yn(const char *message);
-void toxsave_try_find_save_path(char *dest, size_t destlen);
 void parse_arguments(toxsave_args_t *targs, int argc, char *argv[]);
 void print_tox_fields(Tox *tox);
 void print_help();
 
 // Misc prototypes
-int hexstr(uint8_t *dest, uint8_t *src, size_t src_length, bool uppercase);
-int64_t fsize(FILE *file);
-void joinpath(char *dest, const char *part1, const char *part2, uint32_t maxlen);
 void print_bytes(uint8_t *data, size_t size);
 
 #ifdef TOXSAVE_USE_ENC

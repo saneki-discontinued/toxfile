@@ -4,7 +4,6 @@
 #include <string.h>
 #include <linux/limits.h>
 #include <getopt.h>
-#include <termios.h>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -17,6 +16,9 @@
 
 #include "toxfile.h"
 #include "../file.h"
+#include "../hex.h"
+#include "../io.h"
+#include "../path.h"
 
 int main(int argc, char *argv[])
 {
@@ -202,7 +204,7 @@ int toxsave_hash(toxsave_args_t *args)
 		uint8_t hashstr[hashstr_length];
 		memset(hashstr, 0, hashstr_length);
 
-		hexstr(hashstr, hash, sizeof(hash), false);
+		to_hex(hashstr, hash, sizeof(hash), 0);
 		printf("%s\n", hashstr);
 	}
 
@@ -223,7 +225,7 @@ void toxsave_new(toxsave_args_t *args)
 			exit(EXIT_FAILURE);
 		}
 
-		int overwrite = toxsave_prompt_yn("File exists, overwrite? (y/N) ");
+		int overwrite = prompt_yn("File exists, overwrite? (y/N) ");
 		if(overwrite < 0)
 		{
 			fprintf(stderr, "error prompting for input\n");
@@ -259,7 +261,7 @@ void toxsave_open(toxsave_args_t *args)
 	// If no path passed in args, try to find path
 	if(savepath == NULL)
 	{
-		toxsave_try_find_save_path(savepathbuf, sizeof(savepathbuf));
+		toxfile_try_find_save_path(savepathbuf, sizeof(savepathbuf));
 
 		// If still empty string (all 0x00s), couldn't find default file
 		if(strlen(savepathbuf) == 0)
@@ -325,7 +327,7 @@ void toxsave_open(toxsave_args_t *args)
 		args->was_encrypted = true;
 
 		char passphrase[PASS_MAX];
-		toxsave_getpass("Tox savefile password: ", passphrase, sizeof(passphrase));
+		getpass("Tox savefile password: ", passphrase, sizeof(passphrase));
 
 		loadret = tox_encrypted_load(tox, savedata, savesize, passphrase, strlen(passphrase));
 #else
@@ -390,7 +392,7 @@ int toxsave_decrypt(Tox *tox, toxsave_args_t *args)
 int toxsave_encrypt(Tox *tox, toxsave_args_t *args)
 {
 	uint8_t passphrase[PASS_MAX];
-	toxsave_getpass("Encrypt with password: ", passphrase, sizeof(passphrase));
+	getpass("Encrypt with password: ", passphrase, sizeof(passphrase));
 
 	return toxsave_save_enc(tox, args->opened_path, passphrase);
 }
@@ -541,40 +543,6 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 	}
 }
 
-void toxsave_try_find_save_path(char *dest, size_t destlen)
-{
-	if(dest == NULL || destlen == 0)
-		return;
-
-#if defined(_WIN32) || defined(_WIN64)
-	return; // Do nothing for now
-#else // Assume *nix
-
-	struct stat st;
-	char temp[destlen];
-	char *homepath = getenv("HOME");
-
-	// Check default Venom path for current user
-	joinpath(temp, homepath, TOXSAVE_NIX_HPATH_VENOM, sizeof(temp));
-	if(stat(temp, &st) == 0 && S_ISREG(st.st_mode))
-	{
-		strncpy(dest, temp, destlen);
-		return;
-	}
-
-	memset(temp, 0, sizeof(temp));
-
-	// Check default uTox path for current user
-	joinpath(temp, homepath, TOXSAVE_NIX_HPATH_UTOX, sizeof(temp));
-	if(stat(temp, &st) == 0 && S_ISREG(st.st_mode))
-	{
-		strncpy(dest, temp, destlen);
-		return;
-	}
-
-#endif
-}
-
 void print_tox_fields(Tox *tox)
 {
 	// --- Basic --- //
@@ -610,130 +578,4 @@ void print_bytes(uint8_t *data, size_t size)
 {
 	for(size_t i = 0; i < size; i++)
 		printf("%02X", data[i]);
-}
-
-void joinpath(char *dest, const char *part1, const char *part2, uint32_t maxlen)
-{
-	if(dest == NULL)
-		return;
-
-	if(maxlen == 0)
-		maxlen = PATH_MAX;
-
-	if(part1 != NULL && part2 == NULL)
-	{
-		strncpy(dest, part1, maxlen - 1);
-		return;
-	}
-	else if (part1 == NULL && part2 != NULL)
-	{
-		strncpy(dest, part2, maxlen - 1);
-		return;
-	}
-
-	//if((strlen(part1) + strlen(part2) + 1) > maxlen)
-	//{
-	//	return;
-	//}
-
-	// Issue: if part2 is really long, could buffer overflow
-
-	int p1len = strlen(part1);
-
-	char sep = '/'; // Assume *nix for now
-
-	strcpy(dest, part1);
-
-	if(part1[p1len-1] == sep && part2[0] == sep)
-	{
-		strcpy(dest+p1len, part2+1);
-	}
-	else if(part1[p1len-1] != sep && part2[0] != sep)
-	{
-		strcpy(dest+p1len, "/");
-		strcpy(dest+p1len+1, part2);
-	}
-	else
-	{
-		strcpy(dest+p1len, part2);
-	}
-}
-
-int toxsave_getpass(const char *text, char *out, size_t outlen)
-{
-	if(out == NULL || outlen == 0)
-	{
-		return -1;
-	}
-
-	memset(out, 0, outlen);
-
-	struct termios oflags, nflags;
-
-	tcgetattr(STDIN_FILENO, &oflags);
-	nflags = oflags;
-	nflags.c_lflag &= ~ECHO;
-	nflags.c_lflag |= ECHONL;
-
-	// Disable echo in console
-	if(tcsetattr(STDIN_FILENO, TCSANOW, &nflags) != 0)
-	{
-		return -1;
-	}
-
-	if(text != NULL)
-	{
-		printf(text);
-	}
-
-	fgets(out, outlen, stdin);
-	out[outlen - 1] = 0; // Null term
-
-	// Restore console
-	if(tcsetattr(STDIN_FILENO, TCSANOW, &oflags) != 0)
-	{
-		return -1;
-	}
-
-	return 0;
-}
-
-// Prompt for yes/no input
-// Returns 0 on yes, 1 on no, a negative integer on error
-int toxsave_prompt_yn(const char *message)
-{
-	if(message != NULL)
-	{
-		printf(message);
-	}
-
-	int answer = fgetc(stdin);
-	if(answer < 0)
-	{
-		return -1;
-	}
-
-	if(answer == 'y' || answer == 'Y') return 0;
-	else return 1;
-}
-
-// length of dest should be exactly twice the length of src (or src_length * 2)
-int hexstr(uint8_t *dest, uint8_t *src, size_t src_length, bool uppercase)
-{
-	char *format;
-	if(uppercase) format = "%02X";
-	else format = "%02x";
-
-	size_t i;
-	uint8_t c[2];
-
-	for(i = 0; i < src_length; i++)
-	{
-		sprintf(c, format, src[i]);
-
-		dest[(i*2)] = c[0];
-		dest[(i*2)+1] = c[1];
-	}
-
-	return 0;
 }
