@@ -10,28 +10,38 @@
 
 int main(int argc, char *argv[])
 {
-	toxdump_args args = TOXDUMP_INIT_ARGS;
+	toxdump_args_t args = TOXDUMP_INIT_ARGS;
 	parse_args(argc, argv, &args);
 	int ret = perform(&args);
 	return ret;
 }
 
-void parse_args(int argc, char *argv[], toxdump_args *args)
+void parse_args(int argc, char *argv[], toxdump_args_t *args)
 {
 	int c, index, longopt_index = 0;
 	struct option longopts[] =
 	{
-		{ "help", no_argument, 0, 'h' },
-		{ "json", no_argument, 0, 'j' },
+		{ "help",                no_argument, 0, 'h' },
+		{ "hex-uppercase",       no_argument, 0, 'X' },
+		{ "json",                no_argument, 0, 'j' },
+		{ "include-private-key", no_argument, 0, 'x' },
 		{ 0, 0, 0, 0 }
 	};
 
-	while((c = getopt_long(argc, argv, "hj?", longopts, &longopt_index)) != -1)
+	while((c = getopt_long(argc, argv, "hjxX?", longopts, &longopt_index)) != -1)
 	{
 		switch(c)
 		{
 			case 'j':
 				args->format = TOXDUMP_FORMAT_JSON;
+				break;
+
+			case 'x':
+				args->include_priv_key = true;
+				break;
+
+			case 'X':
+				args->hex_uppercase = true;
 				break;
 
 			case 'h':
@@ -49,7 +59,7 @@ void parse_args(int argc, char *argv[], toxdump_args *args)
 	}
 }
 
-int perform(toxdump_args *args)
+int perform(toxdump_args_t *args)
 {
 	if(args->print_help)
 	{
@@ -75,12 +85,13 @@ int perform(toxdump_args *args)
 
 		FILE *outfile = stdout;
 
+		int state_flags = (args->include_priv_key ? TOXFILE_LOAD_PRIVKEY : 0);
 		toxfile_state_t state;
-		toxfile_load_state(tox, &state, 0);
+		toxfile_load_state(tox, &state, state_flags);
 
 		if(args->format == TOXDUMP_FORMAT_JSON)
 		{
-			toxdump_perform_json(&state, outfile);
+			toxdump_perform_json(&state, outfile, args);
 		}
 	}
 
@@ -91,6 +102,8 @@ void print_help()
 {
 	printf("toxdump - dump tox file to some format\n");
 	printf("usage: toxdump [-hj?] [toxfile]\n");
-	printf("  -j, --json        dump to JSON\n");
-	printf("  -h, -?, --help    display this usage message\n");
+	printf("  -j, --json                   dump to JSON\n");
+	printf("  -x, --include-private-key    include private key in the output\n");
+	printf("  -X, --hex-uppercase          dump hex strings in uppercase\n");
+	printf("  -h, -?, --help               display this usage message\n");
 }

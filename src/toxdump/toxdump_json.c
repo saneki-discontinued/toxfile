@@ -6,15 +6,17 @@
 #include "../toxfile_state.h"
 #include "../hex.h"
 
-int toxdump_perform_json(toxfile_state_t *state, FILE *file)
+int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *args)
 {
 	json_t *j_root = json_object();
+
+	int hex_flags = (args->hex_uppercase ? HEX_UPPERCASE : 0);
 
 	// Binary -> Hex strings
 	uint8_t t_address_hex[sizeof(state->address) * 2];
 	uint8_t t_public_key_hex[sizeof(state->public_key) * 2];
-	to_hex(t_address_hex, (char*)state->address, sizeof(state->address), 0);
-	to_hex(t_public_key_hex, (char*)state->address, sizeof(state->address), 0);
+	to_hex(t_address_hex, (char*)state->address, sizeof(state->address), hex_flags);
+	to_hex(t_public_key_hex, (char*)state->address, sizeof(state->address), hex_flags);
 
 	// Initialize json_t variables
 	json_t *j_str_name = json_stringn((char*)state->name, state->name_len);
