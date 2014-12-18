@@ -89,7 +89,8 @@ int perform(toxdump_args_t *args)
 		toxfile_state_t state;
 		toxfile_load_state(tox, &state, state_flags);
 
-		if(args->format == TOXDUMP_FORMAT_JSON)
+		if(args->format == TOXDUMP_FORMAT_NONE
+		|| args->format == TOXDUMP_FORMAT_JSON)
 		{
 			toxdump_perform_json(&state, outfile, args);
 		}
@@ -101,8 +102,8 @@ int perform(toxdump_args_t *args)
 void print_help()
 {
 	printf("toxdump - dump tox file to some format\n");
-	printf("usage: toxdump [-hj?] [toxfile]\n");
-	printf("  -j, --json                   dump to JSON\n");
+	printf("usage: toxdump [options] <file>\n");
+	printf("  -j, --json                   dump to JSON (default)\n");
 	printf("  -x, --include-private-key    include private key in the output\n");
 	printf("  -X, --hex-uppercase          dump hex strings in uppercase\n");
 	printf("  -h, -?, --help               display this usage message\n");

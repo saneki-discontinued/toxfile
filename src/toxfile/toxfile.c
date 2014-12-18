@@ -145,7 +145,7 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 void print_help()
 {
 	printf("toxfile - general purpose utility for tox files\n");
-	printf("usage: toxfile [OPTIONS] <file>\n");
+	printf("usage: toxfile [options] <file>\n");
 	printf(" -a, --print-address     print tox address\n");
 	printf(" -B, --hash-write-bin    write hash to stdout as binary\n");
 #ifdef TOXSAVE_USE_ENC

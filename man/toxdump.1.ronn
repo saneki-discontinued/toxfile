@@ -14,6 +14,12 @@ toxdump(1) -- dump tox files to other formats
   * `-j`, `--json`:
     Use JSON as the format to dump to.
 
+  * `-x`, `--include-private-key`:
+    Include the private key in the output.
+
+  * `-X`, `--hex-uppercase`:
+    Dump hex strings as uppercase. This affects the address, public key and private key.
+
 ## GITHUB
 
 https://github.com/saneki/toxfile
