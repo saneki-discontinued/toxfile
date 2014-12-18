@@ -45,7 +45,6 @@ void parse_args(int argc, char *argv[], toxdump_args *args)
 	{
 		// Only care about first, which would be the toxfile
 		args->toxfile_path = argv[index];
-		printf("TOXFILE_PATH = %s\n", args->toxfile_path);
 		break;
 	}
 }

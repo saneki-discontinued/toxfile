@@ -300,7 +300,6 @@ void toxsave_open(toxsave_args_t *args)
 	args->opened_path = savepath;
 
 	// Try opening at savepath
-	printf("Opening tox file at %s\n", savepath);
 	FILE *savefile = fopen(savepath, "rb");
 
 	if(savefile == NULL)
@@ -350,8 +349,6 @@ void toxsave_open(toxsave_args_t *args)
 		fprintf(stderr, "error loading tox save file\n");
 		exit(1);
 	}
-
-	printf("Successfully loaded tox save\n");
 
 	toxsave_do(tox, args);
 
