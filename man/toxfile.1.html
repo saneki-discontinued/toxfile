@@ -74,26 +74,30 @@
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
-<p><code>toxfile</code> [<var>options</var>...]<br />
-<code>toxfile</code> <code>-t</code> <var>PATH</var> [<var>options</var>...]</p>
+<p><code>toxfile</code> [<var>options</var>...] <var>file</var></p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
-<p><strong>toxfile</strong> is a utility for tox save files.</p>
+<p><strong>toxfile</strong> is a general purpose utility for tox files.</p>
 
 <h2 id="OPTIONS">OPTIONS</h2>
 
 <dl>
-<dt><code>-t</code>, <code>--toxfile</code>[=<var>PATH</var>]</dt><dd><p>Path of tox save file to use. If this is not specified, <strong>toxfile</strong> will try to
-guess the save file location using common paths.</p></dd>
-<dt><code>-d</code>, <code>--decrypt</code></dt><dd><p>Decrypt the specified tox save file. Requires TOXSAVE_USE_ENC.</p></dd>
-<dt><code>-e</code>, <code>--encrypt</code></dt><dd><p>Encrypt the specified tox save file with a password. Requires TOXSAVE_USE_ENC.</p></dd>
+<dt><code>-a</code>, <code>--print-address</code></dt><dd><p>Print the tox address of the specified tox file.</p></dd>
+<dt><code>-d</code>, <code>--decrypt</code></dt><dd><p>Decrypt the specified tox file. Requires TOXSAVE_USE_ENC.</p></dd>
+<dt><code>-e</code>, <code>--encrypt</code></dt><dd><p>Encrypt the specified tox file with a password. Requires TOXSAVE_USE_ENC.</p></dd>
+<dt><code>-H</code>, <code>--hash</code>=<var>path</var></dt><dd><p>Hash a file, writing the result to stdout.</p></dd>
+<dt><code>-k</code>, <code>--print-pubkey</code></dt><dd><p>Print the public key of the specified tox file.</p></dd>
+<dt><code>-m</code>, <code>--print-name</code></dt><dd><p>Print the username of the specified tox file.</p></dd>
+<dt><code>-N</code>, <code>--new</code>=<var>path</var></dt><dd><p>Create a new tox file.</p></dd>
+<dt><code>-s</code>, <code>--print-status-message</code></dt><dd><p>Print the status message of the specified tox file.</p></dd>
+<dt><code>-x</code>, <code>--print-privkey</code></dt><dd><p>Print the private key of the specified tox file.</p></dd>
 </dl>
 
 
 <h2 id="BUILD-FLAGS">BUILD FLAGS</h2>
 
-<p>  TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox save files. Requires
+<p>  TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox files. Requires
     libtoxencryptsave to be installed.</p>
 
 <h2 id="GITHUB">GITHUB</h2>

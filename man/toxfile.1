@@ -7,30 +7,51 @@
 \fBtoxfile\fR \- tox save file utility
 .
 .SH "SYNOPSIS"
-\fBtoxfile\fR [\fIoptions\fR\.\.\.]
-.
-.br
-\fBtoxfile\fR \fB\-t\fR \fIPATH\fR [\fIoptions\fR\.\.\.]
+\fBtoxfile\fR [\fIoptions\fR\.\.\.] \fIfile\fR
 .
 .SH "DESCRIPTION"
-\fBtoxfile\fR is a utility for tox save files\.
+\fBtoxfile\fR is a general purpose utility for tox files\.
 .
 .SH "OPTIONS"
 .
 .TP
-\fB\-t\fR, \fB\-\-toxfile\fR[=\fIPATH\fR]
-Path of tox save file to use\. If this is not specified, \fBtoxfile\fR will try to guess the save file location using common paths\.
+\fB\-a\fR, \fB\-\-print\-address\fR
+Print the tox address of the specified tox file\.
 .
 .TP
 \fB\-d\fR, \fB\-\-decrypt\fR
-Decrypt the specified tox save file\. Requires TOXSAVE_USE_ENC\.
+Decrypt the specified tox file\. Requires TOXSAVE_USE_ENC\.
 .
 .TP
 \fB\-e\fR, \fB\-\-encrypt\fR
-Encrypt the specified tox save file with a password\. Requires TOXSAVE_USE_ENC\.
+Encrypt the specified tox file with a password\. Requires TOXSAVE_USE_ENC\.
+.
+.TP
+\fB\-H\fR, \fB\-\-hash\fR=\fIpath\fR
+Hash a file, writing the result to stdout\.
+.
+.TP
+\fB\-k\fR, \fB\-\-print\-pubkey\fR
+Print the public key of the specified tox file\.
+.
+.TP
+\fB\-m\fR, \fB\-\-print\-name\fR
+Print the username of the specified tox file\.
+.
+.TP
+\fB\-N\fR, \fB\-\-new\fR=\fIpath\fR
+Create a new tox file\.
+.
+.TP
+\fB\-s\fR, \fB\-\-print\-status\-message\fR
+Print the status message of the specified tox file\.
+.
+.TP
+\fB\-x\fR, \fB\-\-print\-privkey\fR
+Print the private key of the specified tox file\.
 .
 .SH "BUILD FLAGS"
-TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox save files\. Requires libtoxencryptsave to be installed\.
+TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox files\. Requires libtoxencryptsave to be installed\.
 .
 .SH "GITHUB"
 https://github\.com/saneki/toxfile

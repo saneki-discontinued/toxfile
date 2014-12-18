@@ -32,13 +32,12 @@ int main(int argc, char *argv[])
 
 void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 {
-	const char *argstr = ":t:aBdeH:nN:pPsh?";
+	const char *argstr = ":t:aBdeH:kmN:sxh?";
 	extern char *optarg;
 
-	int option_index = 0;
+	int option_index = 0, index;
 	struct option long_options[] =
 	{
-		{ "toxfile",       required_argument, 0, 't' },
 #ifdef TOXSAVE_USE_ENC
 		{ "decrypt",       no_argument,       0, 'd' },
 		{ "encrypt",       no_argument,       0, 'e' },
@@ -47,10 +46,17 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 		{ "hash-write-bin",no_argument,       0, 'B' },
 		{ "new",           required_argument, 0, 'N' },
 		{ "print-address", no_argument,       0, 'a' },
-		{ "print-name",    no_argument,       0, 'n' },
-		{ "print-privkey", no_argument,       0, 'P' },
-		{ "print-pubkey",  no_argument,       0, 'p' },
-		{ "print-status",  no_argument,       0, 's' },
+		{ "print-name",    no_argument,       0, 'm' },
+		{ "print-privkey", no_argument,       0, 'x' },
+		{ "print-pubkey",  no_argument,       0, 'k' },
+		{ "print-status-message", no_argument, 0, 's' },
+		{ "print-status",  no_argument,       0, 'u' },
+		{ "set-address",   required_argument, 0, 'A' },
+		{ "set-name",      required_argument, 0, 'M' },
+		{ "set-privkey",   required_argument, 0, 'X' },
+		{ "set-pubkey",    required_argument, 0, 'K' },
+		{ "set-status",    required_argument, 0, 'U' },
+		{ "set-status-message", required_argument, 0, 'S' },
 		{ "help",          no_argument,       0, 'h' },
 		{ 0,               0,                 0,  0  }
 	};
@@ -60,10 +66,6 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 	{
 		switch(c)
 		{
-			case 't':
-				args->savepath = optarg;
-				break;
-
 			case 'a':
 				args->exclusive_print = TOXSAVE_EXPRINT_ADDRESS;
 				break;
@@ -86,7 +88,7 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 				args->hash_path = optarg;
 				break;
 
-			case 'n':
+			case 'm':
 				args->exclusive_print = TOXSAVE_EXPRINT_NAME;
 				break;
 
@@ -95,11 +97,11 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 				args->new_path = optarg;
 				break;
 
-			case 'p':
+			case 'k':
 				args->exclusive_print = TOXSAVE_EXPRINT_PUBKEY;
 				break;
 
-			case 'P':
+			case 'x':
 				args->exclusive_print = TOXSAVE_EXPRINT_PRIVKEY;
 				break;
 
@@ -112,6 +114,12 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 				args->print_help = true;
 				break;
 		}
+	}
+
+	for(index = optind; index < argc; index++)
+	{
+		args->savepath = argv[index];
+		break;
 	}
 
 	// Print help and exit
@@ -136,9 +144,8 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 
 void print_help()
 {
-	printf("toxfile - utility for tox data files\n");
-	printf("usage: toxfile [OPTIONS]\n");
-	printf(" -t, --toxfile=PATH      path to tox save file\n");
+	printf("toxfile - general purpose utility for tox files\n");
+	printf("usage: toxfile [OPTIONS] <file>\n");
 	printf(" -a, --print-address     print tox address\n");
 	printf(" -B, --hash-write-bin    write hash to stdout as binary\n");
 #ifdef TOXSAVE_USE_ENC
@@ -146,12 +153,12 @@ void print_help()
 	printf(" -e, --encrypt           encrypt tox save file\n");
 #endif
 	printf(" -H, --hash=PATH         hash a file, printing result to stdout\n");
-	printf(" -n, --print-name        print tox name\n");
+	printf(" -k, --print-pubkey      print tox public key\n");
+	printf(" -m, --print-name        print tox name\n");
 	printf(" -N, --new=PATH          create a new tox file\n");
-	printf(" -p, --print-pubkey      print tox public key\n");
-	printf(" -P, --print-privkey     print tox private key \n");
-	printf(" -s, --print-status      print tox status message\n");
-	printf(" -h, --help              print help/usage message (this)\n");
+	printf(" -s, --print-status-message    print tox status message\n");
+	printf(" -x, --print-privkey     print tox private key \n");
+	printf(" -h, -?, --help          print help/usage message (this)\n");
 }
 
 int toxsave_hash(toxsave_args_t *args)

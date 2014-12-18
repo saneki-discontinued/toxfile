@@ -3,28 +3,44 @@ toxfile(1) -- tox save file utility
 
 ## SYNOPSIS
 
-`toxfile` [<options>...]<br>
-`toxfile` `-t` <PATH> [<options>...]
+`toxfile` [<options>...] <file>
 
 ## DESCRIPTION
 
-**toxfile** is a utility for tox save files.
+**toxfile** is a general purpose utility for tox files.
 
 ## OPTIONS
 
-  * `-t`, `--toxfile`[=<PATH>]:
-    Path of tox save file to use. If this is not specified, **toxfile** will try to
-    guess the save file location using common paths.
+  * `-a`, `--print-address`:
+    Print the tox address of the specified tox file.
 
   * `-d`, `--decrypt`:
-    Decrypt the specified tox save file. Requires TOXSAVE_USE_ENC.
+    Decrypt the specified tox file. Requires TOXSAVE_USE_ENC.
 
   * `-e`, `--encrypt`:
-    Encrypt the specified tox save file with a password. Requires TOXSAVE_USE_ENC.
+    Encrypt the specified tox file with a password. Requires TOXSAVE_USE_ENC.
+
+  * `-H`, `--hash`=<path>:
+    Hash a file, writing the result to stdout.
+
+  * `-k`, `--print-pubkey`:
+    Print the public key of the specified tox file.
+
+  * `-m`, `--print-name`:
+    Print the username of the specified tox file.
+
+  * `-N`, `--new`=<path>:
+    Create a new tox file.
+
+  * `-s`, `--print-status-message`:
+    Print the status message of the specified tox file.
+
+  * `-x`, `--print-privkey`:
+    Print the private key of the specified tox file.
 
 ## BUILD FLAGS
 
-  TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox save files. Requires
+  TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox files. Requires
     libtoxencryptsave to be installed.
 
 ## GITHUB
