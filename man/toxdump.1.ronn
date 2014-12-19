@@ -14,6 +14,10 @@ toxdump(1) -- dump tox files to other formats
   * `-j`, `--json`:
     Use JSON as the format to dump to.
 
+  * `-p`, `--profile`=<profile>:
+    Specify the profile name to use when looking for a tox file. This will look for
+    ~/.config/tox/<profile>.tox and use it as the tox file if found.
+
   * `-x`, `--include-private-key`:
     Include the private key in the output.
 

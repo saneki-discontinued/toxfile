@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -85,4 +86,25 @@ void toxfile_try_find_save_path(char *dest, size_t destlen)
 	}
 
 #endif
+}
+
+bool toxfile_try_get_profile_path(char *dest, size_t destlen, char *username)
+{
+	struct stat st;
+	char dirpath[destlen], fullpath[destlen], userfile[destlen];
+	char *homepath = getenv("HOME");
+
+	strncpy(userfile, username, sizeof(userfile));
+	strncat(userfile, ".tox", sizeof(userfile));
+
+	joinpath(dirpath, homepath, TOXFILE_NIX_HPATH_DIR, sizeof(dirpath));
+	joinpath(fullpath, dirpath, userfile, sizeof(fullpath));
+
+	if(stat(fullpath, &st) == 0 && S_ISREG(st.st_mode))
+	{
+		strncpy(dest, fullpath, destlen);
+		return true;
+	}
+
+	return false;
 }
