@@ -14,6 +14,9 @@ toxdump(1) -- dump tox files to other formats
   * `-j`, `--json`:
     Use JSON as the format to dump to.
 
+  * `-n`, `--no-newline`:
+    Don't print a newline after dumping toxfile data.
+
   * `-p`, `--profile`=<profile>:
     Specify the profile name to use when looking for a tox file. This will look for
     ~/.config/tox/<profile>.tox and use it as the tox file if found.

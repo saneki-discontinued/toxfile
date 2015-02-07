@@ -29,16 +29,21 @@ void parse_args(int argc, char *argv[], toxdump_args_t *args)
 		{ "hex-uppercase",       no_argument, 0, 'X' },
 		{ "json",                no_argument, 0, 'j' },
 		{ "include-private-key", no_argument, 0, 'x' },
+		{ "no-newline",          no_argument, 0, 'n' },
 		{ "profile",             required_argument, 0, 'p' },
 		{ 0, 0, 0, 0 }
 	};
 
-	while((c = getopt_long(argc, argv, "hjp:xX?", longopts, &longopt_index)) != -1)
+	while((c = getopt_long(argc, argv, "hjnp:xX?", longopts, &longopt_index)) != -1)
 	{
 		switch(c)
 		{
 			case 'j':
 				args->format = TOXDUMP_FORMAT_JSON;
+				break;
+
+			case 'n':
+				args->no_newline = true;
 				break;
 
 			case 'p':
@@ -122,6 +127,11 @@ int perform(toxdump_args_t *args)
 		{
 			toxdump_perform_json(&state, outfile, args);
 		}
+
+		if(!args->no_newline)
+		{
+			printf("\n");
+		}
 	}
 	else if(args->toxfile_path == NULL && args->profile_name == NULL)
 	{
@@ -136,6 +146,7 @@ void print_help()
 	printf("toxdump - dump tox file to some format\n");
 	printf("usage: toxdump [options] <file>\n");
 	printf("  -j, --json                   dump to JSON (default)\n");
+	printf("  -n, --no-newline             don't print a newline\n");
 	printf("  -p, --profile                profile to try and find tox file with\n");
 	printf("  -x, --include-private-key    include private key in the output\n");
 	printf("  -X, --hex-uppercase          dump hex strings in uppercase\n");
