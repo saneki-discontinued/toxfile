@@ -575,7 +575,6 @@ void print_tox_fields(Tox *tox)
 
 	printf("Crypto Info:\n");
 	printf(" Public key:  "); print_bytes(tox_pub_key, sizeof(tox_pub_key)); printf("\n");
-	printf(" Private key: "); print_bytes(tox_priv_key, sizeof(tox_priv_key)); printf("\n");
 }
 
 void print_bytes(uint8_t *data, size_t size)
