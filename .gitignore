@@ -1,3 +1,7 @@
 /toxdump
 /toxfile
+/check
 *.o
+
+# libcheck
+/Testing

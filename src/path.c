@@ -7,51 +7,57 @@
 #include <linux/limits.h>
 #include "path.h"
 
-void joinpath(char *dest, const char *part1, const char *part2, uint32_t maxlen)
+/**
+ * Path join.
+ * @param dest Pointer to destination buffer
+ * @param part1 Pointer to first part of path, null-terminated
+ * @param part2 Pointer to second part of path, null-terminated
+ * @param maxlen Size of dest buffer. If 0, will assume a size of PATH_MAX.
+ * @return 0 if good, or -1 if error
+ */
+int joinpath(char *dest, const char *part1, const char *part2, uint32_t maxlen)
 {
-	if(dest == NULL)
-		return;
+	if(dest == NULL) return -1;
+	if(part1 == NULL && part2 == NULL) return -1;
 
-	if(maxlen == 0)
-		maxlen = PATH_MAX;
+	if(maxlen == 0) maxlen = PATH_MAX;
 
-	if(part1 != NULL && part2 == NULL)
+	// If only one part is NULL, copy over the other
+	if(part1 == NULL)
 	{
-		strncpy(dest, part1, maxlen - 1);
-		return;
+		strncpy(dest, part2, maxlen);
+		return 0;
 	}
-	else if (part1 == NULL && part2 != NULL)
+	else if(part2 == NULL)
 	{
-		strncpy(dest, part2, maxlen - 1);
-		return;
+		strncpy(dest, part1, maxlen);
+		return 0;
 	}
 
-	//if((strlen(part1) + strlen(part2) + 1) > maxlen)
-	//{
-	//	return;
-	//}
+	memset(dest, 0, maxlen);
 
-	// Issue: if part2 is really long, could buffer overflow
+	if(part1 == NULL) part1 = "";
+	if(part2 == NULL) part2 = "";
 
-	int p1len = strlen(part1);
+	char sep = '/';
 
-	char sep = '/'; // Assume *nix for now
+	int len1 = strlen(part1), len2 = strlen(part2);	
+	bool sep1 = (len1 > 0 && part1[len1 - 1] == sep),
+	     sep2 = (len2 > 0 && part2[0] == sep);
 
-	strcpy(dest, part1);
-
-	if(part1[p1len-1] == sep && part2[0] == sep)
+	if(sep1) len1--;
+	if(sep2)
 	{
-		strcpy(dest+p1len, part2+1);
+		part2++;
+		len2--;
 	}
-	else if(part1[p1len-1] != sep && part2[0] != sep)
-	{
-		strcpy(dest+p1len, "/");
-		strcpy(dest+p1len+1, part2);
-	}
-	else
-	{
-		strcpy(dest+p1len, part2);
-	}
+
+	//int full_len = (len1 + len2 + 2);
+	//if(full_len > maxlen) full_len = maxlen;
+
+	snprintf(dest, maxlen, "%s%c%s", part1, sep, part2);
+
+	return 0;
 }
 
 void toxfile_try_find_save_path(char *dest, size_t destlen)
