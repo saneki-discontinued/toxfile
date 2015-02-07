@@ -11,3 +11,7 @@ toxdump: $(COMMON_SRC) $(TOXDUMP_SRC)
 
 toxfile: $(COMMON_SRC) $(TOXFILE_SRC)
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+
+clean: distclean
+distclean:
+	rm -f toxdump toxfile
