@@ -9,6 +9,11 @@ TEST_SRC    = $(wildcard test/*.c) $(COMMON_SRC)
 LIBS         = -ltoxcore
 TOXDUMP_LIBS = -ljansson
 
+# If running tests (make check), encryption support not needed
+ifeq ($(MAKECMDGOALS),check)
+	TOXFILE_NO_ENC = true
+endif
+
 # Unless TOXFILE_NO_ENC=true, assume building with encryption support
 ifneq ($(TOXFILE_NO_ENC),true)
 	LIBS += -ltoxencryptsave
