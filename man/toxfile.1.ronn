@@ -40,8 +40,7 @@ toxfile(1) -- tox save file utility
 
 ## BUILD FLAGS
 
-  TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox files. Requires
-    libtoxencryptsave to be installed.
+  TOXFILE_NO_ENC: Builds without libtoxencryptsave support for encryption/decryption of tox files.
 
 ## GITHUB
 
