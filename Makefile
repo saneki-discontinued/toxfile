@@ -9,6 +9,13 @@ TEST_SRC    = $(wildcard test/*.c) $(COMMON_SRC)
 LIBS         = -ltoxcore
 TOXDUMP_LIBS = -ljansson
 
+# Unless TOXFILE_NO_ENC=true, assume building with encryption support
+ifneq ($(TOXFILE_NO_ENC),true)
+	LIBS += -ltoxencryptsave
+else
+	CFLAGS += -DTOXFILE_NO_ENC
+endif
+
 all: toxdump toxfile
 
 toxdump: $(COMMON_SRC) $(TOXDUMP_SRC)

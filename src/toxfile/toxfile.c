@@ -10,7 +10,7 @@
 
 #include <tox/tox.h>
 
-#ifdef TOXSAVE_USE_ENC
+#ifndef TOXFILE_NO_ENC
 #include <tox/toxencryptsave.h>
 #endif
 
@@ -22,15 +22,15 @@
 
 int main(int argc, char *argv[])
 {
-	toxsave_args_t targs = INIT_TOXSAVE_ARGS;
+	toxfile_args_t targs = INIT_TOXFILE_ARGS;
 	parse_arguments(&targs, argc, argv);
 
-	toxsave_open(&targs);
+	toxfile_open(&targs);
 
 	return EXIT_SUCCESS;
 }
 
-void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
+void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 {
 	const char *argstr = ":t:aBdeH:kmN:sxh?";
 	extern char *optarg;
@@ -38,7 +38,7 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 	int option_index = 0, index;
 	struct option long_options[] =
 	{
-#ifdef TOXSAVE_USE_ENC
+#ifndef TOXFILE_NO_ENC
 		{ "decrypt",       no_argument,       0, 'd' },
 		{ "encrypt",       no_argument,       0, 'e' },
 #endif
@@ -67,46 +67,46 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 		switch(c)
 		{
 			case 'a':
-				args->exclusive_print = TOXSAVE_EXPRINT_ADDRESS;
+				args->exclusive_print = TOXFILE_EXPRINT_ADDRESS;
 				break;
 
 			case 'B':
 				args->hash_print_bin = true;
 				break;
 
-#ifdef TOXSAVE_USE_ENC
+#ifndef TOXFILE_NO_ENC
 			case 'd':
-				args->operation = TOXSAVE_OP_DECRYPT;
+				args->operation = TOXFILE_OP_DECRYPT;
 				break;
 
 			case 'e':
-				args->operation = TOXSAVE_OP_ENCRYPT;
+				args->operation = TOXFILE_OP_ENCRYPT;
 				break;
 #endif
 			case 'H':
-				args->operation = TOXSAVE_OP_HASH;
+				args->operation = TOXFILE_OP_HASH;
 				args->hash_path = optarg;
 				break;
 
 			case 'm':
-				args->exclusive_print = TOXSAVE_EXPRINT_NAME;
+				args->exclusive_print = TOXFILE_EXPRINT_NAME;
 				break;
 
 			case 'N':
-				args->operation = TOXSAVE_OP_NEW;
+				args->operation = TOXFILE_OP_NEW;
 				args->new_path = optarg;
 				break;
 
 			case 'k':
-				args->exclusive_print = TOXSAVE_EXPRINT_PUBKEY;
+				args->exclusive_print = TOXFILE_EXPRINT_PUBKEY;
 				break;
 
 			case 'x':
-				args->exclusive_print = TOXSAVE_EXPRINT_PRIVKEY;
+				args->exclusive_print = TOXFILE_EXPRINT_PRIVKEY;
 				break;
 
 			case 's':
-				args->exclusive_print = TOXSAVE_EXPRINT_STATUS;
+				args->exclusive_print = TOXFILE_EXPRINT_STATUS;
 				break;
 
 			case 'h':
@@ -130,14 +130,14 @@ void parse_arguments(toxsave_args_t *args, int argc, char *argv[])
 	}
 
 	// Hashing a file doesn't need to open the tox save file
-	if(args->operation == TOXSAVE_OP_HASH)
+	if(args->operation == TOXFILE_OP_HASH)
 	{
-		toxsave_hash(args);
+		toxfile_hash(args);
 		exit(EXIT_SUCCESS);
 	}
-	else if(args->operation == TOXSAVE_OP_NEW)
+	else if(args->operation == TOXFILE_OP_NEW)
 	{
-		toxsave_new(args);
+		toxfile_new(args);
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -148,7 +148,7 @@ void print_help()
 	printf("usage: toxfile [options] <file>\n");
 	printf(" -a, --print-address     print tox address\n");
 	printf(" -B, --hash-write-bin    write hash to stdout as binary\n");
-#ifdef TOXSAVE_USE_ENC
+#ifndef TOXFILE_NO_ENC
 	printf(" -d, --decrypt           decrypt tox save file\n");
 	printf(" -e, --encrypt           encrypt tox save file\n");
 #endif
@@ -161,24 +161,24 @@ void print_help()
 	printf(" -h, -?, --help          print help/usage message (this)\n");
 }
 
-int toxsave_hash(toxsave_args_t *args)
+int toxfile_hash(toxfile_args_t *args)
 {
 	if(args->hash_path == NULL)
 	{
-		return TOXSAVE_ERR_NOPATH;
+		return TOXFILE_ERR_NOPATH;
 	}
 
 	FILE *file = fopen(args->hash_path, "r");
 	if(file == NULL)
 	{
 		fprintf(stderr, "Error hashing, can't open file\n");
-		return TOXSAVE_ERR_FOPEN;
+		return TOXFILE_ERR_FOPEN;
 	}
 
 	int64_t filesize = fsize(file);
-	if(filesize > TOXSAVE_HASH_MAX)
+	if(filesize > TOXFILE_HASH_MAX)
 	{
-		filesize = TOXSAVE_HASH_MAX;
+		filesize = TOXFILE_HASH_MAX;
 		printf("Filesize greater than max, hashing only first %i bytes\n", filesize);
 	}
 
@@ -189,7 +189,7 @@ int toxsave_hash(toxsave_args_t *args)
 	{
 		fclose(file);
 		fprintf(stderr, "Error hashing, read count mismatch\n");
-		return TOXSAVE_ERR_FREAD;
+		return TOXFILE_ERR_FREAD;
 	}
 
 	int ret = tox_hash(hash, buffer, sizeof(buffer));
@@ -197,7 +197,7 @@ int toxsave_hash(toxsave_args_t *args)
 	{
 		fclose(file);
 		fprintf(stderr, "Error hashing, tox_hash failed\n");
-		return TOXSAVE_ERR_HASH;
+		return TOXFILE_ERR_HASH;
 	}
 
 	// Write to stdout as binary
@@ -218,7 +218,7 @@ int toxsave_hash(toxsave_args_t *args)
 	return 0;
 }
 
-void toxsave_new(toxsave_args_t *args)
+void toxfile_new(toxfile_args_t *args)
 {
 	// Check if file exists, prompt if the user wants to
 	// overwrite an existing file
@@ -252,7 +252,7 @@ void toxsave_new(toxsave_args_t *args)
 		exit(EXIT_FAILURE);
 	}
 
-	int result = toxsave_save(tox, args->new_path);
+	int result = toxfile_save(tox, args->new_path);
 	if(result != 0) {
 		exit(EXIT_FAILURE);
 	}
@@ -260,7 +260,7 @@ void toxsave_new(toxsave_args_t *args)
 	tox_kill(tox);
 }
 
-void toxsave_open(toxsave_args_t *args)
+void toxfile_open(toxfile_args_t *args)
 {
 	char savepathbuf[PATH_MAX];
 	char *savepath = args->savepath;
@@ -329,7 +329,7 @@ void toxsave_open(toxsave_args_t *args)
 
 	// If encrypted, decrypt if possible, otherwise error
 	if(loadret == 1) {
-#ifdef TOXSAVE_USE_ENC
+#ifndef TOXFILE_NO_ENC
 		args->was_encrypted = true;
 
 		char passphrase[PASS_MAX];
@@ -350,19 +350,19 @@ void toxsave_open(toxsave_args_t *args)
 		exit(1);
 	}
 
-	toxsave_do(tox, args);
+	toxfile_do(tox, args);
 
 	tox_kill(tox);
 }
 
-#ifdef TOXSAVE_USE_ENC
+#ifndef TOXFILE_NO_ENC
 // Decrypt a file based on args
-int toxsave_decrypt(Tox *tox, toxsave_args_t *args)
+int toxfile_decrypt(Tox *tox, toxfile_args_t *args)
 {
 	if(!args->was_encrypted)
 	{
 		fprintf(stderr, "Tox save file is already unencrypted\n");
-		return TOXSAVE_ERR_ALREADY_ENC;
+		return TOXFILE_ERR_ALREADY_ENC;
 	}
 
 	uint32_t size = tox_size(tox);
@@ -375,7 +375,7 @@ int toxsave_decrypt(Tox *tox, toxsave_args_t *args)
 	{
 		free(savedata);
 		fprintf(stderr, "error opening file to save\n");
-		return TOXSAVE_ERR_FOPEN;
+		return TOXFILE_ERR_FOPEN;
 	}
 
 	size_t written = fwrite(savedata, 1, size, file);
@@ -386,29 +386,29 @@ int toxsave_decrypt(Tox *tox, toxsave_args_t *args)
 	if(written != size)
 	{
 		fprintf(stderr, "count mismatch when saving file\n");
-		return TOXSAVE_ERR_FWRITE;
+		return TOXFILE_ERR_FWRITE;
 	}
 
 	return 0;
 }
 
 // Encrypt a file based on args
-int toxsave_encrypt(Tox *tox, toxsave_args_t *args)
+int toxfile_encrypt(Tox *tox, toxfile_args_t *args)
 {
 	uint8_t passphrase[PASS_MAX];
 	getpass("Encrypt with password: ", passphrase, sizeof(passphrase));
 
-	return toxsave_save_enc(tox, args->opened_path, passphrase);
+	return toxfile_save_enc(tox, args->opened_path, passphrase);
 }
-#endif // TOXSAVE_USE_ENC
+#endif // ! TOXFILE_NO_ENC
 
-int toxsave_save(Tox *tox, const char *path)
+int toxfile_save(Tox *tox, const char *path)
 {
 	FILE *file = fopen(path, "wb");
 	if(file == NULL)
 	{
 		fprintf(stderr, "error opening file\n");
-		return TOXSAVE_ERR_FOPEN;
+		return TOXFILE_ERR_FOPEN;
 	}
 
 	// Save tox to buffer
@@ -422,20 +422,20 @@ int toxsave_save(Tox *tox, const char *path)
 	if(written != size)
 	{
 		fprintf(stderr, "count mismatch while saving file\n");
-		return TOXSAVE_ERR_FWRITE;
+		return TOXFILE_ERR_FWRITE;
 	}
 
 	return 0;
 }
 
-#ifdef TOXSAVE_USE_ENC
-int toxsave_save_enc(Tox *tox, const char *path, uint8_t *pass)
+#ifndef TOXFILE_NO_ENC
+int toxfile_save_enc(Tox *tox, const char *path, uint8_t *pass)
 {
 	FILE *file = fopen(path, "wb");
 	if(file == NULL)
 	{
 		fprintf(stderr, "error opening file\n");
-		return TOXSAVE_ERR_FOPEN;
+		return TOXFILE_ERR_FOPEN;
 	}
 
 	uint32_t size = tox_encrypted_size(tox);
@@ -444,7 +444,7 @@ int toxsave_save_enc(Tox *tox, const char *path, uint8_t *pass)
 	if(success != 0)
 	{
 		fprintf(stderr, "error using tox_encrypted_save");
-		return TOXSAVE_ERR_ENCRYPTED_SAVE;
+		return TOXFILE_ERR_ENCRYPTED_SAVE;
 	}
 
 	int written = fwrite(data, 1, size, file);
@@ -453,29 +453,29 @@ int toxsave_save_enc(Tox *tox, const char *path, uint8_t *pass)
 	if(written != size)
 	{
 		fprintf(stderr, "count mismatch while saving file\n");
-		return TOXSAVE_ERR_FWRITE;
+		return TOXFILE_ERR_FWRITE;
 	}
 
 	return 0;
 }
 #endif
 
-void toxsave_do(Tox *tox, toxsave_args_t *args)
+void toxfile_do(Tox *tox, toxfile_args_t *args)
 {
 	// If operation
-	if(args->operation != TOXSAVE_OP_NONE)
+	if(args->operation != TOXFILE_OP_NONE)
 	{
 		switch(args->operation)
 		{
-#ifdef TOXSAVE_USE_ENC
-			case TOXSAVE_OP_DECRYPT:
+#ifndef TOXFILE_NO_ENC
+			case TOXFILE_OP_DECRYPT:
 				{
-					toxsave_decrypt(tox, args);
+					toxfile_decrypt(tox, args);
 					break;
 				}
-			case TOXSAVE_OP_ENCRYPT:
+			case TOXFILE_OP_ENCRYPT:
 				{
-					toxsave_encrypt(tox, args);
+					toxfile_encrypt(tox, args);
 					break;
 				}
 #endif
@@ -483,12 +483,12 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 	}
 
 	// If printing an exclusive value
-	if(args->exclusive_print != TOXSAVE_EXPRINT_NONE)
+	if(args->exclusive_print != TOXFILE_EXPRINT_NONE)
 	{
 		switch(args->exclusive_print)
 		{
 			// Print only client address
-			case TOXSAVE_EXPRINT_ADDRESS:
+			case TOXFILE_EXPRINT_ADDRESS:
 				{
 					uint8_t tox_addr[TOX_FRIEND_ADDRESS_SIZE];
 					tox_get_address(tox, tox_addr);
@@ -498,7 +498,7 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 				break;
 
 			// Print only name
-			case TOXSAVE_EXPRINT_NAME:
+			case TOXFILE_EXPRINT_NAME:
 				{
 					uint8_t tox_name[TOX_MAX_NAME_LENGTH];
 					memset(tox_name, 0, sizeof(tox_name));
@@ -509,7 +509,7 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 				break;
 
 			// Print only the public key
-			case TOXSAVE_EXPRINT_PUBKEY:
+			case TOXFILE_EXPRINT_PUBKEY:
 				{
 					uint8_t tox_pub_key[32];
 					tox_get_keys(tox, tox_pub_key, NULL);
@@ -519,7 +519,7 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 				break;
 
 			// Print only private key
-			case TOXSAVE_EXPRINT_PRIVKEY:
+			case TOXFILE_EXPRINT_PRIVKEY:
 				{
 					uint8_t tox_priv_key[32];
 					tox_get_keys(tox, NULL, tox_priv_key);
@@ -529,7 +529,7 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 				break;
 
 			// Print only status message
-			case TOXSAVE_EXPRINT_STATUS:
+			case TOXFILE_EXPRINT_STATUS:
 				{
 					uint8_t tox_status[TOX_MAX_STATUSMESSAGE_LENGTH];
 					memset(tox_status, 0, sizeof(tox_status));
@@ -540,8 +540,8 @@ void toxsave_do(Tox *tox, toxsave_args_t *args)
 				break;
 		}
 	}
-	else if(args->exclusive_print == TOXSAVE_EXPRINT_NONE
-			&& args->operation == TOXSAVE_OP_NONE)
+	else if(args->exclusive_print == TOXFILE_EXPRINT_NONE
+			&& args->operation == TOXFILE_OP_NONE)
 	{
 		print_tox_fields(tox);
 	}
