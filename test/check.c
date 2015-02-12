@@ -17,8 +17,6 @@ int main()
 	int num_failed = 0;
 
 #define RUN(tsuite) (num_failed += run_test_suite((tsuite)))
-	RUN(toxfile_hex_suite());
-	RUN(toxfile_path_suite());
 #undef RUN
 
 	return (num_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;

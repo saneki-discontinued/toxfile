@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include <jansson.h>
 #include <tox/tox.h>
+#include <libsy.h>
 #include "toxdump.h"
 #include "toxdump_json.h"
 #include "../toxfile_state.h"
-#include "../hex.h"
+//#include "../hex.h"
 
 int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *args)
 {
@@ -15,8 +16,8 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	// Binary -> Hex strings
 	uint8_t t_address_hex[sizeof(state->address) * 2];
 	uint8_t t_public_key_hex[sizeof(state->public_key) * 2];
-	to_hex(t_address_hex, (char*)state->address, sizeof(state->address), hex_flags);
-	to_hex(t_public_key_hex, (char*)state->address, sizeof(state->address), hex_flags);
+	hexx(t_address_hex, (char*)state->address, sizeof(state->address), hex_flags);
+	hexx(t_public_key_hex, (char*)state->address, sizeof(state->address), hex_flags);
 
 	// Initialize json_t variables
 	json_t *j_str_name = json_stringn((char*)state->name, state->name_len);
@@ -36,7 +37,7 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	if(state->has_private_key == 1)
 	{
 		uint8_t t_private_key_hex[sizeof(state->private_key) * 2];
-		to_hex(t_private_key_hex, state->private_key, sizeof(state->private_key), 0);
+		hexx(t_private_key_hex, state->private_key, sizeof(state->private_key), 0);
 		j_str_private_key = json_stringn((char*)t_private_key_hex, sizeof(t_private_key_hex));
 		json_object_set(j_root, "private_key", j_str_private_key);
 	}

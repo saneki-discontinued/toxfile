@@ -3,7 +3,4 @@
 
 #include <check.h>
 
-Suite * toxfile_hex_suite();
-Suite * toxfile_path_suite();
-
 #endif

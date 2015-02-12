@@ -1,11 +1,13 @@
 CC    ?= gcc
 CFLAGS = -std=c99
 
-COMMON_SRC  = $(wildcard src/*.c)
+LIBSY_SRC   = $(wildcard lib/libsy/src/*.c)
+COMMON_SRC  = $(wildcard src/*.c) $(LIBSY_SRC)
 TOXDUMP_SRC = $(wildcard src/toxdump/*.c)
 TOXFILE_SRC = $(wildcard src/toxfile/*.c)
 TEST_SRC    = $(wildcard test/*.c) $(COMMON_SRC)
 
+INCLUDES     = -Ilib/libsy/include
 LIBS         = -ltoxcore
 TOXDUMP_LIBS = -ljansson
 
@@ -24,13 +26,13 @@ endif
 all: toxdump toxfile
 
 toxdump: $(COMMON_SRC) $(TOXDUMP_SRC)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(TOXDUMP_LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(INCLUDES) $(TOXDUMP_LIBS)
 
 toxfile: $(COMMON_SRC) $(TOXFILE_SRC)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(INCLUDES)
 
 check: $(TEST_SRC)
-	$(CC) -o check $^ $(CFLAGS) $(LIBS) -lcheck
+	$(CC) -o check $^ $(CFLAGS) $(LIBS) $(INCLUDES) -lcheck
 	./check
 .PHONY: check
 

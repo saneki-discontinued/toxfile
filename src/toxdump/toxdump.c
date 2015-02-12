@@ -5,10 +5,11 @@
 #include <linux/limits.h>
 #include <unistd.h>
 #include <tox/tox.h>
+#include <libsy.h>
 #include "toxdump.h"
 #include "toxdump_json.h"
 #include "../toxfile_state.h"
-#include "../file.h"
+//#include "../file.h"
 #include "../path.h"
 
 int main(int argc, char *argv[])

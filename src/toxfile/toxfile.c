@@ -14,9 +14,11 @@
 #include <tox/toxencryptsave.h>
 #endif
 
+#include <libsy.h>
+
 #include "toxfile.h"
-#include "../file.h"
-#include "../hex.h"
+//#include "../file.h"
+//#include "../hex.h"
 #include "../io.h"
 #include "../path.h"
 
@@ -211,7 +213,7 @@ int toxfile_hash(toxfile_args_t *args)
 		uint8_t hashstr[hashstr_length];
 		memset(hashstr, 0, hashstr_length);
 
-		to_hex(hashstr, hash, sizeof(hash), 0);
+		hexx(hashstr, hash, sizeof(hash), 0);
 		printf("%s\n", hashstr);
 	}
 
