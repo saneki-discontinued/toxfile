@@ -17,10 +17,9 @@
 #include <libsy.h>
 
 #include "toxfile.h"
-//#include "../file.h"
-//#include "../hex.h"
 #include "../io.h"
 #include "../path.h"
+#include "../version.h"
 
 int main(int argc, char *argv[])
 {
@@ -34,7 +33,7 @@ int main(int argc, char *argv[])
 
 void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 {
-	const char *argstr = ":t:aBdeH:kmN:sxh?";
+	const char *argstr = ":t:aBdeH:kmN:sxh?v";
 	extern char *optarg;
 
 	int option_index = 0, index;
@@ -60,6 +59,7 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 		{ "set-status",    required_argument, 0, 'U' },
 		{ "set-status-message", required_argument, 0, 'S' },
 		{ "help",          no_argument,       0, 'h' },
+		{ "version",       no_argument,       0, 'v' },
 		{ 0,               0,                 0,  0  }
 	};
 
@@ -115,6 +115,10 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 			case '?':
 				args->print_help = true;
 				break;
+
+			case 'v':
+				args->print_version = true;
+				break;
 		}
 	}
 
@@ -128,6 +132,12 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 	if(args->print_help)
 	{
 		print_help();
+		exit(EXIT_SUCCESS);
+	}
+
+	if(args->print_version)
+	{
+		print_version();
 		exit(EXIT_SUCCESS);
 	}
 
@@ -161,6 +171,12 @@ void print_help()
 	printf(" -s, --print-status-message    print tox status message\n");
 	printf(" -x, --print-privkey     print tox private key \n");
 	printf(" -h, -?, --help          print help/usage message (this)\n");
+	printf(" -v, --version           print toxfile version\n");
+}
+
+void print_version()
+{
+	printf("toxfile v%s\n", TOXFILE_PROJ_VERSION);
 }
 
 int toxfile_hash(toxfile_args_t *args)

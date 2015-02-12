@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "TOXFILE" "1" "December 2014" "" ""
+.TH "TOXFILE" "1" "February 2015" "" ""
 .
 .SH "NAME"
 \fBtoxfile\fR \- tox save file utility
@@ -47,11 +47,15 @@ Create a new tox file\.
 Print the status message of the specified tox file\.
 .
 .TP
+\fB\-v\fR, \fB\-\-version\fR
+Print toxfile\'s version and exit\.
+.
+.TP
 \fB\-x\fR, \fB\-\-print\-privkey\fR
 Print the private key of the specified tox file\.
 .
 .SH "BUILD FLAGS"
-TOXSAVE_USE_ENC: Builds with support for encryption/decryption of tox files\. Requires libtoxencryptsave to be installed\.
+TOXFILE_NO_ENC: Builds without libtoxencryptsave support for encryption/decryption of tox files\.
 .
 .SH "GITHUB"
 https://github\.com/saneki/toxfile

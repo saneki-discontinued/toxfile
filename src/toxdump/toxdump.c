@@ -9,8 +9,8 @@
 #include "toxdump.h"
 #include "toxdump_json.h"
 #include "../toxfile_state.h"
-//#include "../file.h"
 #include "../path.h"
+#include "../version.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,10 +32,11 @@ void parse_args(int argc, char *argv[], toxdump_args_t *args)
 		{ "include-private-key", no_argument, 0, 'x' },
 		{ "no-newline",          no_argument, 0, 'n' },
 		{ "profile",             required_argument, 0, 'p' },
+		{ "version",             no_argument, 0, 'v' },
 		{ 0, 0, 0, 0 }
 	};
 
-	while((c = getopt_long(argc, argv, "hjnp:xX?", longopts, &longopt_index)) != -1)
+	while((c = getopt_long(argc, argv, "hjnp:vxX?", longopts, &longopt_index)) != -1)
 	{
 		switch(c)
 		{
@@ -49,6 +50,10 @@ void parse_args(int argc, char *argv[], toxdump_args_t *args)
 
 			case 'p':
 				args->profile_name = optarg;
+				break;
+
+			case 'v':
+				args->print_version = true;
 				break;
 
 			case 'x':
@@ -79,6 +84,12 @@ int perform(toxdump_args_t *args)
 	if(args->print_help)
 	{
 		print_help();
+		return 0;
+	}
+
+	if(args->print_version)
+	{
+		print_version();
 		return 0;
 	}
 
@@ -152,4 +163,10 @@ void print_help()
 	printf("  -x, --include-private-key    include private key in the output\n");
 	printf("  -X, --hex-uppercase          dump hex strings in uppercase\n");
 	printf("  -h, -?, --help               display this usage message\n");
+	printf("  -v, --version                print toxdump version\n");
+}
+
+void print_version()
+{
+	printf("toxdump v%s\n", TOXFILE_PROJ_VERSION);
 }

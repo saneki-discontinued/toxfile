@@ -41,9 +41,10 @@ typedef struct __toxfile_args_t
 	bool was_encrypted;
 	bool hash_print_bin;
 	bool print_help;
+	bool print_version;
 } toxfile_args_t;
 
-#define INIT_TOXFILE_ARGS { NULL, NULL, NULL, NULL, TOXFILE_OP_NONE, TOXFILE_EXPRINT_NONE, false, false, false }
+#define INIT_TOXFILE_ARGS { NULL, NULL, NULL, NULL, TOXFILE_OP_NONE, TOXFILE_EXPRINT_NONE, false, false, false, false }
 
 // Prototypes
 void toxfile_do(Tox *tox, toxfile_args_t *args);
@@ -54,6 +55,7 @@ int toxfile_save(Tox *tox, const char *path);
 void parse_arguments(toxfile_args_t *targs, int argc, char *argv[]);
 void print_tox_fields(Tox *tox);
 void print_help();
+void print_version();
 
 // Misc prototypes
 void print_bytes(uint8_t *data, size_t size);

@@ -35,6 +35,9 @@ toxfile(1) -- tox save file utility
   * `-s`, `--print-status-message`:
     Print the status message of the specified tox file.
 
+  * `-v`, `--version`:
+    Print toxfile's version and exit.
+
   * `-x`, `--print-privkey`:
     Print the private key of the specified tox file.
 
