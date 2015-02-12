@@ -1,0 +1,3 @@
+[submodule "lib/libsy"]
+	path = lib/libsy
+	url = https://github.com/saneki/libsy.git
