@@ -17,7 +17,7 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	uint8_t t_address_hex[sizeof(state->address) * 2];
 	uint8_t t_public_key_hex[sizeof(state->public_key) * 2];
 	hexx(t_address_hex, (char*)state->address, sizeof(state->address), hex_flags);
-	hexx(t_public_key_hex, (char*)state->address, sizeof(state->address), hex_flags);
+	hexx(t_public_key_hex, (char*)state->public_key, sizeof(state->public_key), hex_flags);
 
 	// Initialize json_t variables
 	json_t *j_str_name = json_stringn((char*)state->name, state->name_len);
