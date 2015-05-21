@@ -401,8 +401,6 @@ int toxfile_save_enc(Tox *tox, const char *path, uint8_t *pass)
 		return TOXFILE_ERR_FOPEN;
 	}
 
-	// printf("[encrypt] password: %s, length: %i\n", pass, strlen(pass));
-
 	uint32_t data_size = tox_get_savedata_size(tox);
 	uint8_t *data = (uint8_t*)malloc(data_size * sizeof(uint8_t));
 	tox_get_savedata(tox, data);

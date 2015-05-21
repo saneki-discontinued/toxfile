@@ -148,8 +148,6 @@ Tox * toxfile_open_ex(const char *savepath, TOXFILE_ERR_OPEN *r_error, TOX_ERR_N
 		memset(passphrase, 0, sizeof(passphrase));
 		getpass("Tox savefile password: ", passphrase, sizeof(passphrase));
 
-		// printf("[decrypt] password: %s, length: %i\n", passphrase, strlen(passphrase));
-
 		// Try to decrypt savedata using inputted password
 		size_t newdatasize = (savesize - TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
 		uint8_t *newdata = (uint8_t*)malloc(newdatasize * sizeof(uint8_t));

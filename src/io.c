@@ -54,6 +54,13 @@ int getpass(const char *text, char *out, size_t outlen)
 	fgets(out, outlen, stdin);
 	out[outlen - 1] = 0; // Null term
 
+	// Remove trailing newline
+	char *newline;
+	if((newline = strchr(out, '\n')) != NULL)
+	{
+		*newline = 0;
+	}
+
 	// Restore console
 	if(tcsetattr(STDIN_FILENO, TCSANOW, &oflags) != 0)
 	{
