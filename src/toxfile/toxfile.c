@@ -35,6 +35,7 @@
 #include <libsy.h>
 
 #include "toxfile.h"
+#include "../toxfile_util.h"
 #include "../io.h"
 #include "../path.h"
 #include "../version.h"
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
 	toxfile_args_t targs = INIT_TOXFILE_ARGS;
 	parse_arguments(&targs, argc, argv);
 
-	toxfile_open(&targs);
+	toxfile_open_with(&targs);
 
 	return EXIT_SUCCESS;
 }
@@ -197,6 +198,25 @@ void print_version()
 	printf("toxfile v%s\n", TOXFILE_PROJ_VERSION);
 }
 
+void toxfile_open_with(toxfile_args_t *args)
+{
+	TOXFILE_ERR_OPEN error;
+	Tox *tox = toxfile_open(args->savepath, &error);
+	if(error != TOXFILE_ERR_OPEN_OK && error != TOXFILE_ERR_OPEN_OK_ENCRYPTED)
+	{
+		fprintf(stderr, "toxfile_open error: %i\n", error);
+		exit(EXIT_FAILURE);
+	}
+
+	args->was_encrypted = (error == TOXFILE_ERR_OPEN_OK_ENCRYPTED);
+
+	// Store opened path
+	args->opened_path = args->savepath;
+
+	toxfile_do(tox, args);
+	tox_kill(tox);
+}
+
 int toxfile_hash(toxfile_args_t *args)
 {
 	if(args->hash_path == NULL)
@@ -212,9 +232,9 @@ int toxfile_hash(toxfile_args_t *args)
 	}
 
 	int64_t filesize = fsize(file);
-	if(filesize > TOXFILE_HASH_MAX)
+	if(filesize > TOX_HASH_LENGTH)
 	{
-		filesize = TOXFILE_HASH_MAX;
+		filesize = TOX_HASH_LENGTH;
 		printf("Filesize greater than max, hashing only first %i bytes\n", filesize);
 	}
 
@@ -281,10 +301,11 @@ void toxfile_new(toxfile_args_t *args)
 	}
 
 	// Create new tox
-	Tox *tox = tox_new(NULL);
-	if(tox == NULL)
+	TOX_ERR_NEW error;
+	Tox *tox = tox_new(NULL, NULL, 0, &error);
+	if(error != TOX_ERR_NEW_OK)
 	{
-		fprintf(stderr, "error creating new tox\n");
+		fprintf(stderr, "tox_new error: %i\n", error);
 		exit(EXIT_FAILURE);
 	}
 
@@ -292,101 +313,6 @@ void toxfile_new(toxfile_args_t *args)
 	if(result != 0) {
 		exit(EXIT_FAILURE);
 	}
-
-	tox_kill(tox);
-}
-
-void toxfile_open(toxfile_args_t *args)
-{
-	char savepathbuf[PATH_MAX];
-	char *savepath = args->savepath;
-
-	// If no path passed in args, try to find path
-	if(savepath == NULL)
-	{
-		toxfile_try_find_save_path(savepathbuf, sizeof(savepathbuf));
-
-		// If still empty string (all 0x00s), couldn't find default file
-		if(strlen(savepathbuf) == 0)
-		{
-			fprintf(stderr, "could not find file at default save path\n");
-			exit(EXIT_FAILURE);
-		}
-
-		savepath = savepathbuf;
-	}
-	else
-	{
-		// Make sure path passed via args is at least a regular file
-		struct stat st;
-		if(stat(savepath, &st) != 0)
-		{
-			fprintf(stderr, "specified save file does not exist\n");
-			exit(EXIT_FAILURE);
-		}
-
-		if(!S_ISREG(st.st_mode))
-		{
-			fprintf(stderr, "specified save file is not regular file\n");
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	// Store opened path
-	args->opened_path = savepath;
-
-	// Try opening at savepath
-	FILE *savefile = fopen(savepath, "rb");
-
-	if(savefile == NULL)
-	{
-		fprintf(stderr, "error opening tox savefile\n");
-		exit(1);
-	}
-
-	Tox_Options opts;
-	Tox *tox = tox_new(&opts);
-
-	if(tox == NULL)
-	{
-		fclose(savefile);
-		fprintf(stderr, "error initializing Tox struct (init_tox)\n");
-		exit(1);
-	}
-
-	int64_t savesize = fsize(savefile);
-	uint8_t *savedata = (uint8_t*)malloc(savesize * sizeof(uint8_t));
-	memset(savedata, 0, savesize);
-
-	int numread = fread(savedata, savesize, 1, savefile);
-	fclose(savefile);
-
-	int loadret = tox_load(tox, savedata, savesize);
-
-	// If encrypted, decrypt if possible, otherwise error
-	if(loadret == 1) {
-#ifndef TOXFILE_NO_ENC
-		args->was_encrypted = true;
-
-		char passphrase[PASS_MAX];
-		getpass("Tox savefile password: ", passphrase, sizeof(passphrase));
-
-		loadret = tox_encrypted_load(tox, savedata, savesize, passphrase, strlen(passphrase));
-#else
-		free(savedata);
-		fprintf(stderr, "Tox savefile is encrypted, aborting\n");
-		exit(1);
-#endif
-	}
-
-	if(loadret != 0)
-	{
-		free(savedata);
-		fprintf(stderr, "error loading tox save file\n");
-		exit(1);
-	}
-
-	toxfile_do(tox, args);
 
 	tox_kill(tox);
 }
@@ -401,10 +327,10 @@ int toxfile_decrypt(Tox *tox, toxfile_args_t *args)
 		return TOXFILE_ERR_ALREADY_ENC;
 	}
 
-	uint32_t size = tox_size(tox);
+	uint32_t size = tox_get_savedata_size(tox);
 	uint8_t *savedata = (uint8_t*)malloc(size * sizeof(uint8_t));
 	memset(savedata, 0, size);
-	tox_save(tox, savedata);
+	tox_get_savedata(tox, savedata);
 
 	FILE *file = fopen(args->opened_path, "w");
 	if(file == NULL)
@@ -434,6 +360,7 @@ int toxfile_encrypt(Tox *tox, toxfile_args_t *args)
 	uint8_t passphrase[PASS_MAX];
 	getpass("Encrypt with password: ", passphrase, sizeof(passphrase));
 
+	printf("Encrypting with password: %s\n", passphrase);
 	return toxfile_save_enc(tox, args->opened_path, passphrase);
 }
 #endif // ! TOXFILE_NO_ENC
@@ -448,9 +375,9 @@ int toxfile_save(Tox *tox, const char *path)
 	}
 
 	// Save tox to buffer
-	uint32_t size = tox_size(tox);
+	uint32_t size = tox_get_savedata_size(tox);
 	uint8_t data[size];
-	tox_save(tox, data);
+	tox_get_savedata(tox, data);
 
 	int64_t written = fwrite(data, 1, size, file);
 	fclose(file);
@@ -474,19 +401,31 @@ int toxfile_save_enc(Tox *tox, const char *path, uint8_t *pass)
 		return TOXFILE_ERR_FOPEN;
 	}
 
-	uint32_t size = tox_encrypted_size(tox);
-	uint8_t data[size];
-	int success = tox_encrypted_save(tox, data, pass, strlen(pass));
-	if(success != 0)
+	// printf("[encrypt] password: %s, length: %i\n", pass, strlen(pass));
+
+	uint32_t data_size = tox_get_savedata_size(tox);
+	uint8_t *data = (uint8_t*)malloc(data_size * sizeof(uint8_t));
+	tox_get_savedata(tox, data);
+
+	size_t encdata_size = (data_size + TOX_PASS_ENCRYPTION_EXTRA_LENGTH);
+	uint8_t *encdata = (uint8_t*)malloc(encdata_size * sizeof(uint8_t));
+	TOX_ERR_ENCRYPTION encrypt_error;
+	tox_pass_encrypt(data, data_size, pass, strlen(pass), encdata, &encrypt_error);
+	free(data);
+
+	if(encrypt_error != TOX_ERR_ENCRYPTION_OK)
 	{
-		fprintf(stderr, "error using tox_encrypted_save");
+		fclose(file);
+		free(encdata);
+		fprintf(stderr, "tox_pass_encrypt error: %i\n", encrypt_error);
 		return TOXFILE_ERR_ENCRYPTED_SAVE;
 	}
 
-	int written = fwrite(data, 1, size, file);
+	size_t written = fwrite(encdata, 1, encdata_size, file);
 	fclose(file);
+	free(encdata);
 
-	if(written != size)
+	if(written != encdata_size)
 	{
 		fprintf(stderr, "count mismatch while saving file\n");
 		return TOXFILE_ERR_FWRITE;
@@ -526,8 +465,8 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 			// Print only client address
 			case TOXFILE_EXPRINT_ADDRESS:
 				{
-					uint8_t tox_addr[TOX_FRIEND_ADDRESS_SIZE];
-					tox_get_address(tox, tox_addr);
+					uint8_t tox_addr[TOX_ADDRESS_SIZE];
+					tox_self_get_address(tox, tox_addr);
 					print_bytes(tox_addr, sizeof(tox_addr));
 					printf("\n");
 				}
@@ -539,7 +478,7 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 					uint8_t tox_name[TOX_MAX_NAME_LENGTH];
 					memset(tox_name, 0, sizeof(tox_name));
 
-					tox_get_self_name(tox, tox_name);
+					tox_self_get_name(tox, tox_name);
 					printf("%s\n", tox_name);
 				}
 				break;
@@ -547,8 +486,8 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 			// Print only the public key
 			case TOXFILE_EXPRINT_PUBKEY:
 				{
-					uint8_t tox_pub_key[32];
-					tox_get_keys(tox, tox_pub_key, NULL);
+					uint8_t tox_pub_key[TOX_PUBLIC_KEY_SIZE];
+					tox_self_get_public_key(tox, tox_pub_key);
 					print_bytes(tox_pub_key, sizeof(tox_pub_key));
 					printf("\n");
 				}
@@ -557,8 +496,8 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 			// Print only private key
 			case TOXFILE_EXPRINT_PRIVKEY:
 				{
-					uint8_t tox_priv_key[32];
-					tox_get_keys(tox, NULL, tox_priv_key);
+					uint8_t tox_priv_key[TOX_SECRET_KEY_SIZE];
+					tox_self_get_secret_key(tox, tox_priv_key);
 					print_bytes(tox_priv_key, sizeof(tox_priv_key));
 					printf("\n");
 				}
@@ -567,10 +506,10 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 			// Print only status message
 			case TOXFILE_EXPRINT_STATUS:
 				{
-					uint8_t tox_status[TOX_MAX_STATUSMESSAGE_LENGTH];
+					uint8_t tox_status[TOX_MAX_STATUS_MESSAGE_LENGTH];
 					memset(tox_status, 0, sizeof(tox_status));
 
-					tox_get_self_status_message(tox, tox_status, TOX_MAX_STATUSMESSAGE_LENGTH);
+					tox_self_get_status_message(tox, tox_status);
 					printf("%s\n", tox_status);
 				}
 				break;
@@ -588,15 +527,15 @@ void print_tox_fields(Tox *tox)
 	// --- Basic --- //
 
 	uint8_t tox_name[TOX_MAX_NAME_LENGTH];
-	uint8_t tox_status[TOX_MAX_STATUSMESSAGE_LENGTH];
-	uint8_t tox_addr[TOX_FRIEND_ADDRESS_SIZE];
+	uint8_t tox_status[TOX_MAX_STATUS_MESSAGE_LENGTH];
+	uint8_t tox_addr[TOX_ADDRESS_SIZE];
 
 	memset(tox_name, 0, sizeof(tox_name));
 	memset(tox_status, 0, sizeof(tox_status));
 
-	tox_get_self_name(tox, tox_name);
-	tox_get_self_status_message(tox, tox_status, TOX_MAX_STATUSMESSAGE_LENGTH);
-	tox_get_address(tox, tox_addr);
+	tox_self_get_name(tox, tox_name);
+	tox_self_get_status_message(tox, tox_status);
+	tox_self_get_address(tox, tox_addr);
 
 	printf("Basic Info:\n");
 
@@ -606,8 +545,8 @@ void print_tox_fields(Tox *tox)
 
 	// --- Crypto --- //
 
-	uint8_t tox_pub_key[32], tox_priv_key[32];
-	tox_get_keys(tox, tox_pub_key, tox_priv_key);
+	uint8_t tox_pub_key[TOX_PUBLIC_KEY_SIZE];
+	tox_self_get_public_key(tox, tox_pub_key);
 
 	printf("Crypto Info:\n");
 	printf(" Public key:  "); print_bytes(tox_pub_key, sizeof(tox_pub_key)); printf("\n");

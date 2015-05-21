@@ -36,8 +36,6 @@
 #define TOXFILE_EXPRINT_NAME 4
 #define TOXFILE_EXPRINT_STATUS 5
 
-#define TOXFILE_HASH_MAX TOX_AVATAR_MAX_DATA_LENGTH
-
 // Error constants
 #define TOXFILE_ERR_FOPEN -100
 #define TOXFILE_ERR_FWRITE -101
@@ -68,7 +66,7 @@ typedef struct __toxfile_args_t
 void toxfile_do(Tox *tox, toxfile_args_t *args);
 int toxfile_hash(toxfile_args_t *args);
 void toxfile_new(toxfile_args_t *args);
-void toxfile_open(toxfile_args_t *args);
+void toxfile_open_with(toxfile_args_t *args);
 int toxfile_save(Tox *tox, const char *path);
 void parse_arguments(toxfile_args_t *targs, int argc, char *argv[]);
 void print_tox_fields(Tox *tox);

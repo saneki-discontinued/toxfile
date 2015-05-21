@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
 #include <linux/limits.h>
@@ -27,6 +28,7 @@
 #include "toxdump.h"
 #include "toxdump_json.h"
 #include "../toxfile_state.h"
+#include "../toxfile_util.h"
 #include "../path.h"
 #include "../version.h"
 
@@ -132,21 +134,13 @@ int perform(toxdump_args_t *args)
 
 	if(strlen(path) > 0)
 	{
-		// Make this better
-		Tox *tox = tox_new(NULL);
-		if(tox == NULL) return -1;
-		FILE *infile = fopen(path, "rb");
-		if(infile == NULL) return -1;
-
-		int64_t savesize = fsize(infile);
-		uint8_t savedata[savesize];
-		fread(savedata, savesize, 1, infile);
-		fclose(infile);
-
-		int loadret = tox_load(tox, savedata, savesize);
-		if(loadret != 0) return -1;
-
-		FILE *outfile = stdout;
+		TOXFILE_ERR_OPEN error;
+		Tox *tox = toxfile_open(path, &error);
+		if(error != TOXFILE_ERR_OPEN_OK && error != TOXFILE_ERR_OPEN_OK_ENCRYPTED)
+		{
+			fprintf(stderr, "toxfile_open error: %i\n", error);
+			exit(EXIT_FAILURE);
+		}
 
 		int state_flags = (args->include_priv_key ? TOXFILE_LOAD_PRIVKEY : 0);
 		toxfile_state_t state;
@@ -155,7 +149,7 @@ int perform(toxdump_args_t *args)
 		if(args->format == TOXDUMP_FORMAT_NONE
 		|| args->format == TOXDUMP_FORMAT_JSON)
 		{
-			toxdump_perform_json(&state, outfile, args);
+			toxdump_perform_json(&state, stdout, args);
 		}
 
 		if(!args->no_newline)
