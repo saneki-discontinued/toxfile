@@ -62,8 +62,6 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 		{ "decrypt",       no_argument,       0, 'd' },
 		{ "encrypt",       no_argument,       0, 'e' },
 #endif
-		{ "hash",          required_argument, 0, 'H' },
-		{ "hash-write-bin",no_argument,       0, 'B' },
 		{ "new",           required_argument, 0, 'N' },
 		{ "print-address", no_argument,       0, 'a' },
 		{ "print-name",    no_argument,       0, 'm' },
@@ -91,10 +89,6 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 				args->exclusive_print = TOXFILE_EXPRINT_ADDRESS;
 				break;
 
-			case 'B':
-				args->hash_print_bin = true;
-				break;
-
 #ifndef TOXFILE_NO_ENC
 			case 'd':
 				args->operation = TOXFILE_OP_DECRYPT;
@@ -104,11 +98,6 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 				args->operation = TOXFILE_OP_ENCRYPT;
 				break;
 #endif
-			case 'H':
-				args->operation = TOXFILE_OP_HASH;
-				args->hash_path = optarg;
-				break;
-
 			case 'm':
 				args->exclusive_print = TOXFILE_EXPRINT_NAME;
 				break;
@@ -160,13 +149,7 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 		exit(EXIT_SUCCESS);
 	}
 
-	// Hashing a file doesn't need to open the tox save file
-	if(args->operation == TOXFILE_OP_HASH)
-	{
-		toxfile_hash(args);
-		exit(EXIT_SUCCESS);
-	}
-	else if(args->operation == TOXFILE_OP_NEW)
+	if(args->operation == TOXFILE_OP_NEW)
 	{
 		toxfile_new(args);
 		exit(EXIT_SUCCESS);
@@ -178,12 +161,10 @@ void print_help()
 	printf("toxfile - general purpose utility for tox files\n");
 	printf("usage: toxfile [options] <file>\n");
 	printf(" -a, --print-address     print tox address\n");
-	printf(" -B, --hash-write-bin    write hash to stdout as binary\n");
 #ifndef TOXFILE_NO_ENC
 	printf(" -d, --decrypt           decrypt tox save file\n");
 	printf(" -e, --encrypt           encrypt tox save file\n");
 #endif
-	printf(" -H, --hash=PATH         hash a file, printing result to stdout\n");
 	printf(" -k, --print-pubkey      print tox public key\n");
 	printf(" -m, --print-name        print tox name\n");
 	printf(" -N, --new=PATH          create a new tox file\n");
@@ -215,63 +196,6 @@ void toxfile_open_with(toxfile_args_t *args)
 
 	toxfile_do(tox, args);
 	tox_kill(tox);
-}
-
-int toxfile_hash(toxfile_args_t *args)
-{
-	if(args->hash_path == NULL)
-	{
-		return TOXFILE_ERR_NOPATH;
-	}
-
-	FILE *file = fopen(args->hash_path, "r");
-	if(file == NULL)
-	{
-		fprintf(stderr, "Error hashing, can't open file\n");
-		return TOXFILE_ERR_FOPEN;
-	}
-
-	int64_t filesize = fsize(file);
-	if(filesize > TOX_HASH_LENGTH)
-	{
-		filesize = TOX_HASH_LENGTH;
-		printf("Filesize greater than max, hashing only first %i bytes\n", filesize);
-	}
-
-	uint8_t buffer[filesize], hash[TOX_HASH_LENGTH];
-
-	size_t read = fread(buffer, 1, sizeof(buffer), file);
-	if(read != sizeof(buffer))
-	{
-		fclose(file);
-		fprintf(stderr, "Error hashing, read count mismatch\n");
-		return TOXFILE_ERR_FREAD;
-	}
-
-	int ret = tox_hash(hash, buffer, sizeof(buffer));
-	if(ret != 0)
-	{
-		fclose(file);
-		fprintf(stderr, "Error hashing, tox_hash failed\n");
-		return TOXFILE_ERR_HASH;
-	}
-
-	// Write to stdout as binary
-	if(args->hash_print_bin)
-	{
-		fwrite(hash, 1, sizeof(hash), stdout);
-	}
-	else // Write to stdout as hex string
-	{
-		size_t hashstr_length = (sizeof(hash) * 2) + 1;
-		uint8_t hashstr[hashstr_length];
-		memset(hashstr, 0, hashstr_length);
-
-		hexx(hashstr, hash, sizeof(hash), 0);
-		printf("%s\n", hashstr);
-	}
-
-	return 0;
 }
 
 void toxfile_new(toxfile_args_t *args)

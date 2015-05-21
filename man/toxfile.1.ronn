@@ -20,9 +20,6 @@ toxfile(1) -- tox save file utility
   * `-e`, `--encrypt`:
     Encrypt the specified tox file with a password. Requires TOXSAVE_USE_ENC.
 
-  * `-H`, `--hash`=<path>:
-    Hash a file, writing the result to stdout.
-
   * `-k`, `--print-pubkey`:
     Print the public key of the specified tox file.
 

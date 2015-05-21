@@ -50,21 +50,18 @@ typedef struct __toxfile_args_t
 {
 	char *savepath;      // Path to the savefile
 	char *opened_path;   // Path to file after opened
-	char *hash_path;     // Path to file to be hashed
 	char *new_path;      // Path to new tox file
 	int operation;
 	int exclusive_print; // Which field to print exclusively
 	bool was_encrypted;
-	bool hash_print_bin;
 	bool print_help;
 	bool print_version;
 } toxfile_args_t;
 
-#define INIT_TOXFILE_ARGS { NULL, NULL, NULL, NULL, TOXFILE_OP_NONE, TOXFILE_EXPRINT_NONE, false, false, false, false }
+#define INIT_TOXFILE_ARGS { NULL, NULL, NULL, TOXFILE_OP_NONE, TOXFILE_EXPRINT_NONE, false, false, false }
 
 // Prototypes
 void toxfile_do(Tox *tox, toxfile_args_t *args);
-int toxfile_hash(toxfile_args_t *args);
 void toxfile_new(toxfile_args_t *args);
 void toxfile_open_with(toxfile_args_t *args);
 int toxfile_save(Tox *tox, const char *path);
