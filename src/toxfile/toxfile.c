@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 {
-	const char *argstr = ":t:aBdeH:kmN:sxh?v";
+	const char *argstr = ":t:adekmN:sxh?v";
 	extern char *optarg;
 
 	int option_index = 0, index;
