@@ -16,14 +16,23 @@
  *
  */
 
-#ifndef TOXDUMP_JSON_H
-#define TOXDUMP_JSON_H
+#ifndef TOXDUMP_JANSSON_EXPORTS_H
+#define TOXDUMP_JANSSON_EXPORTS_H
 
-#include "toxdump.h"
-#include "../toxfile_state.h"
+#include <stdbool.h>
+#include <jansson.h>
 
-bool toxdump_json_dlopen();
-void toxdump_json_dlclose();
-int toxdump_json_perform(toxfile_state_t *state, FILE *file, toxdump_args_t *args);
+typedef struct jansson_exports_t
+{
+	void *handle;
+	json_t *(*json_object)();
+	json_t *(*json_stringn)(const char *, size_t);
+	json_t *(*json_integer)(json_int_t);
+	int (*json_dumpf)(const json_t *, FILE *, size_t);
+	int (*json_object_set_new)(json_t *, const char *, json_t *);
+} jansson_exports_t;
 
-#endif
+void toxdump_close_jansson_exports(jansson_exports_t *exports);
+bool toxdump_open_jansson_exports(jansson_exports_t *exports);
+
+#endif // TOXDUMP_JANSSON_EXPORTS_H

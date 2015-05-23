@@ -9,7 +9,7 @@ TEST_SRC    = $(wildcard test/*.c) $(COMMON_SRC)
 
 INCLUDES     = -Ilib/libsy/include
 LIBS         = -ltoxcore
-TOXDUMP_LIBS = -ljansson
+TOXDUMP_LIBS = -ldl
 
 # If running tests (make check), encryption support not needed
 ifeq ($(MAKECMDGOALS),check)

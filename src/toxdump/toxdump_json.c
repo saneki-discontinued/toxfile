@@ -16,18 +16,42 @@
  *
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <jansson.h>
 #include <tox/tox.h>
 #include <libsy.h>
 #include "toxdump.h"
 #include "toxdump_json.h"
+#include "jansson_exports.h"
 #include "../toxfile_state.h"
 //#include "../hex.h"
 
-int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *args)
+jansson_exports_t g_jansson_exports = { .handle = NULL };
+
+#define JANSSON_LOADED (g_jansson_exports.handle != NULL)
+
+bool toxdump_json_dlopen()
 {
-	json_t *j_root = json_object();
+	return toxdump_open_jansson_exports(&g_jansson_exports);
+}
+
+void toxdump_json_dlclose()
+{
+	toxdump_close_jansson_exports(&g_jansson_exports);
+}
+
+int toxdump_json_perform(toxfile_state_t *state, FILE *file, toxdump_args_t *args)
+{
+	if(!JANSSON_LOADED)
+	{
+		fprintf(stderr, "cannot perform json, libjansson not dynamically loaded\n");
+		return -1;
+	}
+
+	jansson_exports_t e = g_jansson_exports;
+
+	json_t *j_root = e.json_object();
 
 	int hex_flags = (args->hex_uppercase ? HEX_UPPERCASE : 0);
 
@@ -38,30 +62,30 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	hexx(t_public_key_hex, (char*)state->public_key, sizeof(state->public_key), hex_flags);
 
 	// Initialize json_t variables
-	json_t *j_str_name = json_stringn((char*)state->name, state->name_len);
-	json_t *j_str_status_msg = json_stringn((char*)state->status_message, state->status_message_len);
-	json_t *j_str_address = json_stringn((char*)t_address_hex, sizeof(t_address_hex));
-	json_t *j_int_status = json_integer(state->status);
-	json_t *j_str_public_key = json_stringn((char*)t_public_key_hex, sizeof(t_public_key_hex));
+	json_t *j_str_name = e.json_stringn((char*)state->name, state->name_len);
+	json_t *j_str_status_msg = e.json_stringn((char*)state->status_message, state->status_message_len);
+	json_t *j_str_address = e.json_stringn((char*)t_address_hex, sizeof(t_address_hex));
+	json_t *j_int_status = e.json_integer(state->status);
+	json_t *j_str_public_key = e.json_stringn((char*)t_public_key_hex, sizeof(t_public_key_hex));
 	json_t *j_str_secret_key = NULL;
 
 	// Set fields to root variable
-	json_object_set(j_root, "address", j_str_address);
-	json_object_set(j_root, "name", j_str_name);
-	json_object_set(j_root, "public_key", j_str_public_key);
-	json_object_set(j_root, "status", j_int_status);
-	json_object_set(j_root, "status_message", j_str_status_msg);
+	e.json_object_set_new(j_root, "address", json_incref(j_str_address));
+	e.json_object_set_new(j_root, "name", json_incref(j_str_name));
+	e.json_object_set_new(j_root, "public_key", json_incref(j_str_public_key));
+	e.json_object_set_new(j_root, "status", json_incref(j_int_status));
+	e.json_object_set_new(j_root, "status_message", json_incref(j_str_status_msg));
 
 	if(state->has_secret_key == 1)
 	{
 		uint8_t t_secret_key_hex[sizeof(state->secret_key) * 2];
 		hexx(t_secret_key_hex, state->secret_key, sizeof(state->secret_key), 0);
-		j_str_secret_key = json_stringn((char*)t_secret_key_hex, sizeof(t_secret_key_hex));
-		json_object_set(j_root, "secret_key", j_str_secret_key);
+		j_str_secret_key = e.json_stringn((char*)t_secret_key_hex, sizeof(t_secret_key_hex));
+		e.json_object_set_new(j_root, "secret_key", json_incref(j_str_secret_key));
 	}
 
 	// Write to file
-	int success = json_dumpf(j_root, file, JSON_SORT_KEYS);
+	int success = e.json_dumpf(j_root, file, JSON_SORT_KEYS);
 
 	// Free json_t variables
 	free(j_str_name);

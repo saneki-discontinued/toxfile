@@ -149,7 +149,11 @@ int perform(toxdump_args_t *args)
 		if(args->format == TOXDUMP_FORMAT_NONE
 		|| args->format == TOXDUMP_FORMAT_JSON)
 		{
-			toxdump_perform_json(&state, stdout, args);
+			if(toxdump_json_dlopen())
+			{
+				toxdump_json_perform(&state, stdout, args);
+				toxdump_json_dlclose();
+			}
 		}
 
 		if(!args->no_newline)
