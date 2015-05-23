@@ -31,7 +31,7 @@ typedef struct __toxdump_args_t
 	char *profile_name;
 	char *toxfile_path;
 	bool hex_uppercase;
-	bool include_priv_key;
+	bool include_secret_key;
 	bool no_newline;
 	bool print_help;
 	bool print_version;

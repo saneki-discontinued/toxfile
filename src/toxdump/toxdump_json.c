@@ -43,7 +43,7 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	json_t *j_str_address = json_stringn((char*)t_address_hex, sizeof(t_address_hex));
 	json_t *j_int_status = json_integer(state->status);
 	json_t *j_str_public_key = json_stringn((char*)t_public_key_hex, sizeof(t_public_key_hex));
-	json_t *j_str_private_key = NULL;
+	json_t *j_str_secret_key = NULL;
 
 	// Set fields to root variable
 	json_object_set(j_root, "address", j_str_address);
@@ -52,12 +52,12 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	json_object_set(j_root, "status", j_int_status);
 	json_object_set(j_root, "status_message", j_str_status_msg);
 
-	if(state->has_private_key == 1)
+	if(state->has_secret_key == 1)
 	{
-		uint8_t t_private_key_hex[sizeof(state->private_key) * 2];
-		hexx(t_private_key_hex, state->private_key, sizeof(state->private_key), 0);
-		j_str_private_key = json_stringn((char*)t_private_key_hex, sizeof(t_private_key_hex));
-		json_object_set(j_root, "private_key", j_str_private_key);
+		uint8_t t_secret_key_hex[sizeof(state->secret_key) * 2];
+		hexx(t_secret_key_hex, state->secret_key, sizeof(state->secret_key), 0);
+		j_str_secret_key = json_stringn((char*)t_secret_key_hex, sizeof(t_secret_key_hex));
+		json_object_set(j_root, "secret_key", j_str_secret_key);
 	}
 
 	// Write to file
@@ -70,9 +70,9 @@ int toxdump_perform_json(toxfile_state_t *state, FILE *file, toxdump_args_t *arg
 	free(j_int_status);
 	free(j_str_public_key);
 
-	if(j_str_private_key != NULL)
+	if(j_str_secret_key != NULL)
 	{
-		free(j_str_private_key);
+		free(j_str_secret_key);
 	}
 
 	free(j_root);

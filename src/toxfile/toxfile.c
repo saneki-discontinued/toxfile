@@ -65,14 +65,14 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 		{ "new",           required_argument, 0, 'N' },
 		{ "print-address", no_argument,       0, 'a' },
 		{ "print-name",    no_argument,       0, 'm' },
-		{ "print-privkey", no_argument,       0, 'x' },
-		{ "print-pubkey",  no_argument,       0, 'k' },
+		{ "print-secret-key", no_argument,    0, 'x' },
+		{ "print-public-key", no_argument,    0, 'k' },
 		{ "print-status-message", no_argument, 0, 's' },
 		{ "print-status",  no_argument,       0, 'u' },
 		{ "set-address",   required_argument, 0, 'A' },
 		{ "set-name",      required_argument, 0, 'M' },
-		{ "set-privkey",   required_argument, 0, 'X' },
-		{ "set-pubkey",    required_argument, 0, 'K' },
+		{ "set-secret-key", required_argument, 0, 'X' },
+		{ "set-public-key", required_argument, 0, 'K' },
 		{ "set-status",    required_argument, 0, 'U' },
 		{ "set-status-message", required_argument, 0, 'S' },
 		{ "help",          no_argument,       0, 'h' },
@@ -112,7 +112,7 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 				break;
 
 			case 'x':
-				args->exclusive_print = TOXFILE_EXPRINT_PRIVKEY;
+				args->exclusive_print = TOXFILE_EXPRINT_SECKEY;
 				break;
 
 			case 's':
@@ -165,11 +165,11 @@ void print_help()
 	printf(" -d, --decrypt           decrypt tox save file\n");
 	printf(" -e, --encrypt           encrypt tox save file\n");
 #endif
-	printf(" -k, --print-pubkey      print tox public key\n");
+	printf(" -k, --print-public-key  print tox public key\n");
 	printf(" -m, --print-name        print tox name\n");
 	printf(" -N, --new=PATH          create a new tox file\n");
 	printf(" -s, --print-status-message    print tox status message\n");
-	printf(" -x, --print-privkey     print tox private key \n");
+	printf(" -x, --print-secret-key  print tox secret key \n");
 	printf(" -h, -?, --help          print help/usage message (this)\n");
 	printf(" -v, --version           print toxfile version\n");
 }
@@ -415,12 +415,12 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 				}
 				break;
 
-			// Print only private key
-			case TOXFILE_EXPRINT_PRIVKEY:
+			// Print only secret key
+			case TOXFILE_EXPRINT_SECKEY:
 				{
-					uint8_t tox_priv_key[TOX_SECRET_KEY_SIZE];
-					tox_self_get_secret_key(tox, tox_priv_key);
-					print_bytes(tox_priv_key, sizeof(tox_priv_key));
+					uint8_t tox_secret_key[TOX_SECRET_KEY_SIZE];
+					tox_self_get_secret_key(tox, tox_secret_key);
+					print_bytes(tox_secret_key, sizeof(tox_secret_key));
 					printf("\n");
 				}
 				break;

@@ -24,8 +24,8 @@ toxdump(1) -- dump tox files to other formats
   * `-v`, `--version`:
     Print toxdump's version and exit.
 
-  * `-x`, `--include-private-key`:
-    Include the private key in the output.
+  * `-x`, `--include-secret-key`:
+    Include the secret key in the output.
 
   * `-X`, `--hex-uppercase`:
     Dump hex strings as uppercase. This affects the address, public key and private key.

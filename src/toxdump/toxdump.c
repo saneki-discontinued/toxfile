@@ -49,7 +49,7 @@ void parse_args(int argc, char *argv[], toxdump_args_t *args)
 		{ "help",                no_argument, 0, 'h' },
 		{ "hex-uppercase",       no_argument, 0, 'X' },
 		{ "json",                no_argument, 0, 'j' },
-		{ "include-private-key", no_argument, 0, 'x' },
+		{ "include-secret-key",  no_argument, 0, 'x' },
 		{ "no-newline",          no_argument, 0, 'n' },
 		{ "profile",             required_argument, 0, 'p' },
 		{ "version",             no_argument, 0, 'v' },
@@ -77,7 +77,7 @@ void parse_args(int argc, char *argv[], toxdump_args_t *args)
 				break;
 
 			case 'x':
-				args->include_priv_key = true;
+				args->include_secret_key = true;
 				break;
 
 			case 'X':
@@ -142,7 +142,7 @@ int perform(toxdump_args_t *args)
 			exit(EXIT_FAILURE);
 		}
 
-		int state_flags = (args->include_priv_key ? TOXFILE_LOAD_PRIVKEY : 0);
+		int state_flags = (args->include_secret_key ? TOXFILE_LOAD_SECRET_KEY : 0);
 		toxfile_state_t state;
 		toxfile_load_state(tox, &state, state_flags);
 
@@ -172,7 +172,7 @@ void print_help()
 	printf("  -j, --json                   dump to JSON (default)\n");
 	printf("  -n, --no-newline             don't print a newline\n");
 	printf("  -p, --profile                profile to try and find tox file with\n");
-	printf("  -x, --include-private-key    include private key in the output\n");
+	printf("  -x, --include-secret-key     include secret key in the output\n");
 	printf("  -X, --hex-uppercase          dump hex strings in uppercase\n");
 	printf("  -h, -?, --help               display this usage message\n");
 	printf("  -v, --version                print toxdump version\n");

@@ -37,14 +37,14 @@ int toxfile_load_state(Tox *tox, toxfile_state_t *state, size_t flags)
 	state->status = tox_self_get_status(tox);
 	tox_self_get_public_key(tox, state->public_key);
 
-	if((flags & TOXFILE_LOAD_PRIVKEY) == TOXFILE_LOAD_PRIVKEY)
+	if((flags & TOXFILE_LOAD_SECRET_KEY) == TOXFILE_LOAD_SECRET_KEY)
 	{
-		tox_self_get_secret_key(tox, state->private_key);
-		state->has_private_key = 1;
+		tox_self_get_secret_key(tox, state->secret_key);
+		state->has_secret_key = 1;
 	}
 	else
 	{
-		state->has_private_key = 0;
+		state->has_secret_key = 0;
 	}
 
 	return 0;

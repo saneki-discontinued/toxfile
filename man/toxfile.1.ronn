@@ -20,7 +20,7 @@ toxfile(1) -- tox save file utility
   * `-e`, `--encrypt`:
     Encrypt the specified tox file with a password. Requires TOXSAVE_USE_ENC.
 
-  * `-k`, `--print-pubkey`:
+  * `-k`, `--print-public-key`:
     Print the public key of the specified tox file.
 
   * `-m`, `--print-name`:
@@ -35,8 +35,8 @@ toxfile(1) -- tox save file utility
   * `-v`, `--version`:
     Print toxfile's version and exit.
 
-  * `-x`, `--print-privkey`:
-    Print the private key of the specified tox file.
+  * `-x`, `--print-secret-key`:
+    Print the secret key of the specified tox file.
 
 ## BUILD FLAGS
 
