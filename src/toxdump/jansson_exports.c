@@ -18,16 +18,22 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifndef TOXDUMP_SO_JANSSON
 #include <dlfcn.h>
+#endif
+
 #include "jansson_exports.h"
 
 void toxdump_close_jansson_exports(jansson_exports_t *exports)
 {
+#ifndef TOXDUMP_SO_JANSSON
 	if(exports != NULL && exports->handle != NULL)
 	{
 		dlclose(exports->handle);
 		exports->handle = NULL;
 	}
+#endif
 }
 
 bool toxdump_open_jansson_exports(jansson_exports_t *exports)
@@ -39,6 +45,19 @@ bool toxdump_open_jansson_exports(jansson_exports_t *exports)
 		fprintf(stderr, "no exports to set\n");
 		return false;
 	}
+
+// Shared object
+#ifdef TOXDUMP_SO_JANSSON
+
+	exports->handle = 1;
+	exports->json_object = json_object;
+	exports->json_stringn = json_stringn;
+	exports->json_integer = json_integer;
+	exports->json_dumpf = json_dumpf;
+	exports->json_object_set_new = json_object_set_new;
+
+// Dynamically loaded from libdl
+#else
 
 	void *lib = dlopen("libjansson.so.4", RTLD_LAZY);
 
@@ -69,6 +88,8 @@ bool toxdump_open_jansson_exports(jansson_exports_t *exports)
 	JANSSON_EXPORT(json_object_set_new);
 
 #undef JANSSON_EXPORT
+
+#endif
 
 	return true;
 }

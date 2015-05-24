@@ -23,6 +23,11 @@ else
 	CFLAGS += -DTOXFILE_NO_ENC
 endif
 
+ifeq ($(TOXDUMP_SO_JANSSON),true)
+	LIBS += -ljansson
+	CFLAGS += -DTOXDUMP_SO_JANSSON
+endif
+
 all: toxdump toxfile
 
 toxdump: $(COMMON_SRC) $(TOXDUMP_SRC)
