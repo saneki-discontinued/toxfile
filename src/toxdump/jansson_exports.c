@@ -59,7 +59,7 @@ bool toxdump_open_jansson_exports(jansson_exports_t *exports)
 // Dynamically loaded from libdl
 #else
 
-	void *lib = dlopen("libjansson.so.4", RTLD_LAZY);
+	void *lib = dlopen("libjansson.so.2", RTLD_LAZY);
 
 	if(lib == NULL)
 	{
