@@ -136,8 +136,14 @@ Tox * toxfile_open_ex(const char *savepath, TOXFILE_ERR_OPEN *r_error, TOX_ERR_N
 		return NULL;
 	}
 
+	struct Tox_Options options;
+	tox_options_default(&options);
+	options.savedata_type = TOX_SAVEDATA_TYPE_TOX_SAVE;
+	options.savedata_data = savedata;
+	options.savedata_length = savesize;
+
 	TOX_ERR_NEW error;
-	Tox *tox = tox_new(NULL, savedata, savesize, &error);
+	Tox *tox = tox_new(&options, &error);
 
 #ifndef TOXFILE_NO_ENC
 	// Prompt for password and try to use that to decrypt
@@ -163,7 +169,9 @@ Tox * toxfile_open_ex(const char *savepath, TOXFILE_ERR_OPEN *r_error, TOX_ERR_N
 
 		if(decrypt_error == TOX_ERR_DECRYPTION_OK)
 		{
-			tox = tox_new(NULL, newdata, newdatasize, &error);
+			options.savedata_data = newdata;
+			options.savedata_length = newdatasize;
+			tox = tox_new(&options, &error);
 			free(newdata);
 			if(error != TOX_ERR_NEW_OK)
 			{

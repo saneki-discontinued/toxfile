@@ -226,7 +226,7 @@ void toxfile_new(toxfile_args_t *args)
 
 	// Create new tox
 	TOX_ERR_NEW error;
-	Tox *tox = tox_new(NULL, NULL, 0, &error);
+	Tox *tox = tox_new(NULL, &error);
 	if(error != TOX_ERR_NEW_OK)
 	{
 		fprintf(stderr, "tox_new error: %i\n", error);
