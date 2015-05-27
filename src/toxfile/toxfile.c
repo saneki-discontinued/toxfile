@@ -284,7 +284,6 @@ int toxfile_encrypt(Tox *tox, toxfile_args_t *args)
 	uint8_t passphrase[PASS_MAX];
 	getpass("Encrypt with password: ", passphrase, sizeof(passphrase));
 
-	printf("Encrypting with password: %s\n", passphrase);
 	return toxfile_save_enc(tox, args->opened_path, passphrase);
 }
 #endif // ! TOXFILE_NO_ENC
