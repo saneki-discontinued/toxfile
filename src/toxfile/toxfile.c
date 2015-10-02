@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
 void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 {
-	const char *argstr = ":t:adekmN:sxh?v";
+	const char *argstr = ":t:adekmnN:sxh?v";
 	extern char *optarg;
 
 	int option_index = 0, index;
@@ -69,6 +69,7 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 		{ "encrypt",       no_argument,       0, 'e' },
 #endif
 		{ "new",           required_argument, 0, 'N' },
+		{ "newline",       no_argument,       0, 'n' },
 		{ "print-address", no_argument,       0, 'a' },
 		{ "print-name",    no_argument,       0, 'm' },
 		{ "print-secret-key", no_argument,    0, 'x' },
@@ -106,6 +107,10 @@ void parse_arguments(toxfile_args_t *args, int argc, char *argv[])
 #endif
 			case 'm':
 				args->exclusive_print = TOXFILE_EXPRINT_NAME;
+				break;
+
+			case 'n':
+				args->newline = true;
 				break;
 
 			case 'N':
@@ -173,6 +178,7 @@ void print_help()
 #endif
 	printf(" -k, --print-public-key  print tox public key\n");
 	printf(" -m, --print-name        print tox name\n");
+	printf(" -n, --newline           when printing a specific field, append a newline\n");
 	printf(" -N, --new=PATH          create a new tox file\n");
 	printf(" -s, --print-status-message    print tox status message\n");
 	printf(" -x, --print-secret-key  print tox secret key \n");
@@ -394,8 +400,8 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 				{
 					uint8_t tox_addr[TOX_ADDRESS_SIZE];
 					tox_self_get_address(tox, tox_addr);
-					print_bytes(tox_addr, sizeof(tox_addr));
-					printf("\n");
+					write_hex(stdout, tox_addr, sizeof(tox_addr));
+					if(args->newline) printf("\n");
 				}
 				break;
 
@@ -404,9 +410,9 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 				{
 					uint8_t tox_name[TOX_MAX_NAME_LENGTH];
 					memset(tox_name, 0, sizeof(tox_name));
-
 					tox_self_get_name(tox, tox_name);
-					printf("%s\n", tox_name);
+					printf("%s", tox_name);
+					if(args->newline) printf("\n");
 				}
 				break;
 
@@ -415,8 +421,8 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 				{
 					uint8_t tox_pub_key[TOX_PUBLIC_KEY_SIZE];
 					tox_self_get_public_key(tox, tox_pub_key);
-					print_bytes(tox_pub_key, sizeof(tox_pub_key));
-					printf("\n");
+					write_hex(stdout, tox_pub_key, sizeof(tox_pub_key));
+					if(args->newline) printf("\n");
 				}
 				break;
 
@@ -425,8 +431,8 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 				{
 					uint8_t tox_secret_key[TOX_SECRET_KEY_SIZE];
 					tox_self_get_secret_key(tox, tox_secret_key);
-					print_bytes(tox_secret_key, sizeof(tox_secret_key));
-					printf("\n");
+					write_hex(stdout, tox_secret_key, sizeof(tox_secret_key));
+					if(args->newline) printf("\n");
 				}
 				break;
 
@@ -435,9 +441,9 @@ void toxfile_do(Tox *tox, toxfile_args_t *args)
 				{
 					uint8_t tox_status[TOX_MAX_STATUS_MESSAGE_LENGTH];
 					memset(tox_status, 0, sizeof(tox_status));
-
 					tox_self_get_status_message(tox, tox_status);
-					printf("%s\n", tox_status);
+					printf("%s", tox_status);
+					if(args->newline) printf("\n");
 				}
 				break;
 		}
@@ -466,7 +472,7 @@ void print_tox_fields(Tox *tox)
 
 	printf("Basic Info:\n");
 
-	printf(" Address:    "); print_bytes(tox_addr, sizeof(tox_addr)); printf("\n");
+	printf(" Address:    "); write_hex(stdout, tox_addr, sizeof(tox_addr)); printf("\n");
 	printf(" Tox Name:   %s\n", tox_name);
 	printf(" Tox Status: %s\n", tox_status);
 
@@ -476,11 +482,11 @@ void print_tox_fields(Tox *tox)
 	tox_self_get_public_key(tox, tox_pub_key);
 
 	printf("Crypto Info:\n");
-	printf(" Public key:  "); print_bytes(tox_pub_key, sizeof(tox_pub_key)); printf("\n");
+	printf(" Public key:  "); write_hex(stdout, tox_pub_key, sizeof(tox_pub_key)); printf("\n");
 }
 
-void print_bytes(uint8_t *data, size_t size)
+void write_hex(FILE *file, uint8_t *data, size_t size)
 {
 	for(size_t i = 0; i < size; i++)
-		printf("%02X", data[i]);
+		fprintf(file, "%02X", data[i]);
 }

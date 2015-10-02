@@ -54,11 +54,12 @@ typedef struct __toxfile_args_t
 	int operation;
 	int exclusive_print; // Which field to print exclusively
 	bool was_encrypted;
+	bool newline;
 	bool print_help;
 	bool print_version;
 } toxfile_args_t;
 
-#define INIT_TOXFILE_ARGS { NULL, NULL, NULL, TOXFILE_OP_NONE, TOXFILE_EXPRINT_NONE, false, false, false }
+#define INIT_TOXFILE_ARGS { NULL, NULL, NULL, TOXFILE_OP_NONE, TOXFILE_EXPRINT_NONE, false, false, false, false }
 
 // Prototypes
 void toxfile_do(Tox *tox, toxfile_args_t *args);
@@ -71,7 +72,7 @@ void print_help();
 void print_version();
 
 // Misc prototypes
-void print_bytes(uint8_t *data, size_t size);
+void write_hex(FILE *file, uint8_t *data, size_t size);
 
 #ifndef TOXFILE_NO_ENC
 int toxfile_encrypt(Tox *tox, toxfile_args_t *args);
