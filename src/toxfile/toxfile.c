@@ -42,8 +42,20 @@
 
 int main(int argc, char *argv[])
 {
+	if(argc < 2)
+	{
+		print_help();
+		return 0;
+	}
+
 	toxfile_args_t targs = INIT_TOXFILE_ARGS;
 	parse_arguments(&targs, argc, argv);
+
+	if (targs.savepath == NULL)
+	{
+		print_help();
+		return 1;
+	}
 
 	toxfile_open_with(&targs);
 
