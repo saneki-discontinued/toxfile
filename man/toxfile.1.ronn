@@ -26,6 +26,9 @@ toxfile(1) -- tox save file utility
   * `-m`, `--print-name`:
     Print the username of the specified tox file.
 
+  * `-n`, `--newline`:
+    When printing a specific field (name, public key, etc), append a newline.
+
   * `-N`, `--new`=<path>:
     Create a new tox file.
 
